@@ -1,0 +1,65 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAllowedType() {
+      // Whitelist of permitted MIME types — executables, scripts,
+      // archives and unknown types are all rejected
+      return request.resource.contentType.matches('application/pdf')
+        || request.resource.contentType.matches('application/msword')
+        || request.resource.contentType.matches(
+             'application/vnd\\.openxmlformats-officedocument\\.wordprocessingml\\.document')
+        || request.resource.contentType.matches(
+             'application/vnd\\.openxmlformats-officedocument\\.spreadsheetml\\.sheet')
+        || request.resource.contentType.matches(
+             'application/vnd\\.openxmlformats-officedocument\\.presentationml\\.presentation')
+        || request.resource.contentType.matches('application/vnd\\.ms-excel')
+        || request.resource.contentType.matches('application/vnd\\.ms-powerpoint')
+        || request.resource.contentType.matches('text/plain')
+        || request.resource.contentType.matches('text/csv')
+        || request.resource.contentType.matches('image/jpeg')
+        || request.resource.contentType.matches('image/png')
+        || request.resource.contentType.matches('image/webp')
+        || request.resource.contentType.matches('image/gif')
+        || request.resource.contentType.matches('image/tiff');
+    }
+
+    function isUnderSizeLimit() {
+      // 50 MB per file — matches MAX_FILE_SIZE in UploadModal.js
+      return request.resource.size <= 50 * 1024 * 1024;
+    }
+
+    // ── Per-user file storage ─────────────────────────────────────────────────
+    // Path structure: /users/{userId}/{documentId}/{filename}
+    // Each user's files are isolated under their own UID path
+    match /users/{userId}/{allPaths=**} {
+
+      // Read: only the file owner can download or preview
+      allow read: if isOwner(userId);
+
+      // Write (upload/overwrite): owner + permitted file type + under size limit
+      allow write: if isOwner(userId)
+        && isAllowedType()
+        && isUnderSizeLimit();
+
+      // Delete: only the file owner
+      allow delete: if isOwner(userId);
+    }
+
+    // ── Deny all other paths ──────────────────────────────────────────────────
+    // Nothing outside /users/ is accessible
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

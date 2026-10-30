@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e-DocSafe – Sign In</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <!-- Firebase SDK (REQUIRED - was missing, causing auth to fail entirely) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card fade-in">
+      <h2><i class="fa-solid fa-right-to-bracket"></i> Welcome Back</h2>
+
+      <form id="signin-form" novalidate>
+        <div id="signin-message" class="message" role="alert" aria-live="polite"></div>
+
+        <label for="signin-email">Email <span aria-hidden="true">*</span></label>
+        <input type="email" id="signin-email" placeholder="Enter your email"
+               required autocomplete="email">
+
+        <label for="signin-password">Password <span aria-hidden="true">*</span></label>
+        <div class="password-container">
+          <input type="password" id="signin-password" placeholder="Your password"
+                 required minlength="6" autocomplete="current-password">
+          <button type="button" class="toggle-password" data-target="signin-password"
+                  aria-label="Toggle password visibility">
+            <i class="fas fa-eye" aria-hidden="true"></i>
+          </button>
+        </div>
+
+        <label class="remember-me">
+          <input type="checkbox" id="rememberMe"> Remember Me
+        </label>
+
+        <button type="submit" class="btn-primary">Sign In</button>
+
+        <p style="text-align:center; margin-top: 0.75rem;">
+          <a href="#" class="forgot-link" onclick="forgotPassword(); return false;">Forgot Password?</a>
+        </p>
+      </form>
+
+      <!-- Forgot password in-page modal (replaces browser prompt/alert) -->
+      <div id="forgotModal" class="forgot-modal hidden" role="dialog" aria-modal="true" aria-labelledby="forgotTitle">
+        <div class="forgot-modal-inner">
+          <h3 id="forgotTitle">Reset Password</h3>
+          <p>Enter your registered email and we'll send a reset link.</p>
+          <div id="forgotMessage" class="message" role="alert" aria-live="polite"></div>
+          <label for="forgotEmail">Email</label>
+          <input type="email" id="forgotEmail" placeholder="your@email.com" autocomplete="email">
+          <div class="forgot-actions">
+            <button type="button" class="btn-primary" onclick="sendResetEmail()">Send Reset Link</button>
+            <button type="button" class="btn-outline-cancel" onclick="closeForgotModal()">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Don't have an account? <a href="Sign-Up.html">Sign Up</a>
+      </div>
+
+      <p class="secured-tag">Secured by <strong>iNex</strong></p>
+    </div>
+  </div>
+
+  <script src="auth.js" defer></script>
+</body>
+</html>

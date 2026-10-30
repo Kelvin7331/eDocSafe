@@ -1,0 +1,1372 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>e-DocSafe README</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;450;500;600&display=swap">
+
+<style>
+  /* ─── Design tokens ───────────────────────────────────────────────────────
+     Layout: sticky left nav + scrolling content, collapses to top-tab mobile
+     Palette: deep navy-black bg, electric blue accent, warm white text
+  ────────────────────────────────────────────────────────────────────────── */
+  :root {
+    --bg:          #0b0f1a;
+    --bg2:         #111827;
+    --bg3:         #1a2236;
+    --border:      #1e2d45;
+    --fg:          #e8edf5;
+    --fg2:         #8fa3be;
+    --fg3:         #4d6485;
+    --accent:      #3b8bff;
+    --accent-dim:  #1a3a6e;
+    --accent-glow: rgba(59,139,255,.18);
+    --green:       #22c55e;
+    --yellow:      #f59e0b;
+    --red:         #ef4444;
+    --code-bg:     #0d1422;
+    --nav-w:       260px;
+    --radius:      10px;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg:          #f4f7fc;
+      --bg2:         #ffffff;
+      --bg3:         #eaf0fb;
+      --border:      #d0daea;
+      --fg:          #0f1b2d;
+      --fg2:         #4a607e;
+      --fg3:         #8fa3be;
+      --accent:      #1a6ef0;
+      --accent-dim:  #dce9ff;
+      --accent-glow: rgba(26,110,240,.12);
+      --code-bg:     #f0f4fa;
+      color-scheme: light;
+    }
+  }
+  :root[data-theme="light"] {
+    --bg:#f4f7fc;--bg2:#ffffff;--bg3:#eaf0fb;--border:#d0daea;
+    --fg:#0f1b2d;--fg2:#4a607e;--fg3:#8fa3be;
+    --accent:#1a6ef0;--accent-dim:#dce9ff;--accent-glow:rgba(26,110,240,.12);
+    --code-bg:#f0f4fa;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --bg:#0b0f1a;--bg2:#111827;--bg3:#1a2236;--border:#1e2d45;
+    --fg:#e8edf5;--fg2:#8fa3be;--fg3:#4d6485;
+    --accent:#3b8bff;--accent-dim:#1a3a6e;--accent-glow:rgba(59,139,255,.18);
+    --code-bg:#0d1422;
+    color-scheme: dark;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { height: 100%; }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    display: flex;
+    flex-direction: column;
+    padding-left:  max(0px, env(safe-area-inset-left, 0px));
+    padding-right: max(0px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+  }
+
+  /* ─── Top bar ──────────────────────────────────────────────────────────── */
+  .topbar {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 50;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+    gap: 16px;
+    flex-shrink: 0;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0 0 auto;
+    height: env(safe-area-inset-top, 0px);
+    z-index: 60;
+    background: var(--bg2);
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 18px;
+    letter-spacing: -.01em;
+    text-decoration: none;
+    color: var(--fg);
+  }
+  .topbar-brand .logo-mark {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .badge-blue { background: var(--accent-dim); color: var(--accent); }
+  .badge-green { background: rgba(34,197,94,.15); color: var(--green); }
+  .badge-yellow { background: rgba(245,158,11,.15); color: var(--yellow); }
+  .btn-icon {
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--fg2);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    transition: background .15s, color .15s;
+  }
+  .btn-icon:hover { background: var(--bg3); color: var(--fg); }
+  .mobile-menu-btn {
+    display: none;
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--fg2);
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  /* ─── Layout ───────────────────────────────────────────────────────────── */
+  .layout {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* ─── Nav ──────────────────────────────────────────────────────────────── */
+  .sidenav {
+    width: var(--nav-w);
+    flex-shrink: 0;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 12px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .nav-section-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    padding: 16px 10px 6px;
+  }
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 12px;
+    border-radius: 7px;
+    color: var(--fg2);
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 450;
+    transition: background .12s, color .12s;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-link:hover { background: var(--bg3); color: var(--fg); }
+  .nav-link.active { background: var(--accent-dim); color: var(--accent); font-weight: 600; }
+  .nav-link .icon { width: 16px; text-align: center; flex-shrink: 0; font-size: 13px; }
+
+  /* ─── Content ──────────────────────────────────────────────────────────── */
+  .content {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: 40px max(24px, env(safe-area-inset-right, 0px)) 80px max(24px, env(safe-area-inset-left, 0px));
+  }
+
+  /* ─── Sections ─────────────────────────────────────────────────────────── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ─── Hero ─────────────────────────────────────────────────────────────── */
+  .hero {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 40px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    text-wrap: balance;
+  }
+  .hero h1 span { color: var(--accent); }
+  .hero-desc {
+    font-size: 17px;
+    color: var(--fg2);
+    max-width: 600px;
+    line-height: 1.65;
+  }
+  .hero-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+  .btn-primary:hover { opacity: .88; }
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 20px;
+    border: 1px solid var(--border);
+    color: var(--fg2);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    background: transparent;
+    cursor: pointer;
+    transition: background .12s, color .12s;
+  }
+  .btn-outline:hover { background: var(--bg3); color: var(--fg); }
+
+  /* ─── Typography ───────────────────────────────────────────────────────── */
+  h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -.01em;
+    text-wrap: balance;
+  }
+  h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    margin: 32px 0 12px;
+    letter-spacing: -.005em;
+  }
+  p { margin-bottom: 16px; color: var(--fg2); max-width: 72ch; }
+  p:last-child { margin-bottom: 0; }
+  strong { color: var(--fg); font-weight: 600; }
+
+  /* ─── Section header ───────────────────────────────────────────────────── */
+  .section-head {
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-head p { margin-top: 8px; margin-bottom: 0; }
+
+  /* ─── Cards ────────────────────────────────────────────────────────────── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .card-icon {
+    width: 38px; height: 38px;
+    background: var(--accent-glow);
+    border-radius: 9px;
+    display: grid;
+    place-items: center;
+    font-size: 17px;
+    margin-bottom: 14px;
+  }
+  .card h4 {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 7px;
+    color: var(--fg);
+  }
+  .card p { font-size: 13.5px; line-height: 1.6; margin: 0; }
+
+  /* ─── Table ────────────────────────────────────────────────────────────── */
+  .table-wrap { overflow-x: auto; margin-bottom: 28px; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; min-width: 0; }
+  th {
+    background: var(--bg3);
+    text-align: left;
+    padding: 10px 16px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--fg3);
+    white-space: nowrap;
+  }
+  td {
+    padding: 11px 16px;
+    border-top: 1px solid var(--border);
+    font-size: 13.5px;
+    vertical-align: top;
+  }
+  td:first-child { color: var(--fg); font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; white-space: nowrap; }
+  tr:last-child td { }
+
+  /* ─── Code ─────────────────────────────────────────────────────────────── */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    overflow-x: auto;
+    margin-bottom: 24px;
+    font-size: 13px;
+    line-height: 1.65;
+  }
+  code {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--fg);
+  }
+  code .comment { color: var(--fg3); }
+  code .kw { color: #7dd3fc; }
+  code .str { color: #86efac; }
+  code .cmd { color: var(--accent); }
+  p code, li code {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    color: var(--fg);
+  }
+
+  /* ─── Lists ────────────────────────────────────────────────────────────── */
+  ul, ol {
+    padding-left: 20px;
+    color: var(--fg2);
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  li { font-size: 14px; }
+  li::marker { color: var(--accent); }
+
+  /* ─── Feature list ─────────────────────────────────────────────────────── */
+  .feature-list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 10px;
+    margin-bottom: 32px;
+  }
+  .feature-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    color: var(--fg2);
+  }
+  .feature-list li::before { content: none; }
+  .feature-list .fi { color: var(--accent); font-size: 14px; margin-top: 2px; flex-shrink: 0; }
+
+  /* ─── Status dot ───────────────────────────────────────────────────────── */
+  .dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .dot-green { background: var(--green); box-shadow: 0 0 5px var(--green); }
+  .dot-yellow { background: var(--yellow); }
+
+  /* ─── File tree ────────────────────────────────────────────────────────── */
+  .file-tree {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.9;
+    overflow-x: auto;
+    margin-bottom: 28px;
+  }
+  .tree-dir { color: var(--accent); font-weight: 500; }
+  .tree-file { color: var(--fg2); }
+  .tree-comment { color: var(--fg3); }
+  .tree-indent { display: inline-block; width: 20px; }
+
+  /* ─── Step list ────────────────────────────────────────────────────────── */
+  .steps { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .step-body { min-width: 0; }
+  .step-body strong { display: block; font-size: 14px; margin-bottom: 4px; }
+  .step-body p { font-size: 13.5px; margin: 0; }
+
+  /* ─── Callout ──────────────────────────────────────────────────────────── */
+  .callout {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 13.5px;
+  }
+  .callout-warn {
+    background: rgba(245,158,11,.1);
+    border: 1px solid rgba(245,158,11,.3);
+    color: #fbbf24;
+  }
+  .callout-info {
+    background: var(--accent-glow);
+    border: 1px solid rgba(59,139,255,.3);
+    color: var(--accent);
+  }
+  .callout-icon { flex-shrink: 0; margin-top: 1px; }
+  .callout-text { color: var(--fg2); }
+  .callout-text strong { color: var(--fg); }
+
+  /* ─── Roadmap ──────────────────────────────────────────────────────────── */
+  .roadmap-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    color: var(--fg2);
+  }
+  .roadmap-item:last-child { border-bottom: none; }
+  .roadmap-item .check { color: var(--green); font-size: 13px; }
+  .roadmap-item .todo { color: var(--fg3); font-size: 13px; }
+
+  /* ─── Author card ──────────────────────────────────────────────────────── */
+  .author-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+  }
+  .author-avatar {
+    width: 56px; height: 56px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .author-info h3 { margin: 0 0 4px; font-size: 18px; }
+  .author-info .role { font-size: 13px; color: var(--fg3); margin-bottom: 10px; }
+  .author-info .contact { display: flex; flex-wrap: wrap; gap: 8px; }
+  .contact-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 12.5px;
+    color: var(--fg2);
+    text-decoration: none;
+  }
+  .contact-chip:hover { background: var(--bg3); color: var(--fg); }
+
+  /* ─── Mobile ───────────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    .sidenav {
+      position: fixed;
+      top: calc(56px + env(safe-area-inset-top, 0px));
+      left: 0;
+      bottom: 0;
+      z-index: 40;
+      transform: translateX(-100%);
+      transition: transform .22s ease;
+      width: 240px;
+    }
+    .sidenav.open { transform: translateX(0); }
+    .mobile-menu-btn { display: flex; }
+    .topbar-badges { display: none; }
+    .content { padding: 24px 16px 60px; }
+    .hero { padding: 24px 0 32px; }
+    .hero h1 { font-size: 28px; }
+    .card-grid { grid-template-columns: 1fr; }
+    .feature-list { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Overlay ──────────────────────────────────────────────────────────── */
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    z-index: 35;
+  }
+  .overlay.open { display: block; }
+
+  /* ─── Arch diagram ─────────────────────────────────────────────────────── */
+  .arch-wrap {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 28px;
+    overflow-x: auto;
+  }
+</style>
+
+<!-- Top bar -->
+<div class="topbar">
+  <a class="topbar-brand" href="#">
+    <div class="logo-mark">e</div>
+    e-DocSafe
+  </a>
+  <div class="topbar-right">
+    <div class="topbar-badges" style="display:flex;gap:6px;">
+      <span class="badge badge-green"><span class="dot dot-green"></span>Active</span>
+      <span class="badge badge-blue">v1.2.0</span>
+      <span class="badge badge-yellow">PWA</span>
+    </div>
+    <button class="btn-icon" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">☀</button>
+    <button class="mobile-menu-btn" id="menuBtn" aria-label="Open navigation">☰</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+  <!-- Sidebar nav -->
+  <nav class="sidenav" id="sidenav" aria-label="Documentation sections">
+    <span class="nav-section-label">Documentation</span>
+    <button class="nav-link active" data-section="overview">
+      <span class="icon">◎</span> Overview
+    </button>
+    <button class="nav-link" data-section="features">
+      <span class="icon">★</span> Features
+    </button>
+    <button class="nav-link" data-section="stack">
+      <span class="icon">⬡</span> Tech Stack
+    </button>
+    <button class="nav-link" data-section="structure">
+      <span class="icon">◫</span> File Structure
+    </button>
+    <button class="nav-link" data-section="start">
+      <span class="icon">▶</span> Getting Started
+    </button>
+    <button class="nav-link" data-section="security">
+      <span class="icon">🔐</span> Security
+    </button>
+    <button class="nav-link" data-section="deploy">
+      <span class="icon">⬆</span> Deployment
+    </button>
+    <button class="nav-link" data-section="pwa">
+      <span class="icon">📱</span> PWA
+    </button>
+    <span class="nav-section-label">Project</span>
+    <button class="nav-link" data-section="roadmap">
+      <span class="icon">↗</span> Roadmap
+    </button>
+    <button class="nav-link" data-section="contributing">
+      <span class="icon">♻</span> Contributing
+    </button>
+    <button class="nav-link" data-section="author">
+      <span class="icon">✦</span> Author
+    </button>
+  </nav>
+
+  <!-- Main content -->
+  <main class="content" id="content">
+
+    <!-- OVERVIEW -->
+    <section class="section active" id="sec-overview">
+      <div class="hero">
+        <div class="hero-eyebrow">
+          <span>📄</span> Kelvinet Technologies &nbsp;·&nbsp; Version 1.2.0
+        </div>
+        <h1>e-<span>DocSafe</span><br>Secure Document<br>Management</h1>
+        <p class="hero-desc">
+          A browser-based, offline-first Progressive Web App for secure personal and
+          organisational document storage. Works fully without internet — syncs to
+          Firebase automatically when back online.
+        </p>
+        <div class="hero-badges">
+          <span class="badge badge-green"><span class="dot dot-green"></span> Active Development</span>
+          <span class="badge badge-blue">Firebase v9 compat</span>
+          <span class="badge badge-blue">IndexedDB</span>
+          <span class="badge badge-yellow">PWA Ready</span>
+          <span class="badge badge-blue">GitHub Pages</span>
+        </div>
+        <div class="hero-links">
+          <a class="btn-primary" href="https://e-docsafe.firebaseapp.com" target="_blank">🔗 Live App</a>
+          <a class="btn-outline" href="https://github.com" target="_blank">⭐ GitHub Repo</a>
+        </div>
+      </div>
+
+      <h2>Why e-DocSafe?</h2>
+      <div class="table-wrap" style="margin-top:16px;">
+        <table>
+          <thead><tr><th>Problem</th><th>e-DocSafe Solution</th></tr></thead>
+          <tbody>
+            <tr><td>Cloud-only apps fail offline</td><td>IndexedDB-first — full functionality without internet</td></tr>
+            <tr><td>Privacy risks on third-party servers</td><td>AES-256 client-side encryption before any cloud upload</td></tr>
+            <tr><td>Poor mobile experience</td><td>Installable PWA — works like a native app on any device</td></tr>
+            <tr><td>Expensive enterprise DMS software</td><td>Free — built entirely on open web standards</td></tr>
+            <tr><td>No offline document previewing</td><td>PDF.js, Mammoth.js, SheetJS — in-browser rendering</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Platform Overview</h3>
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-icon">🔐</div>
+          <h4>Authentication</h4>
+          <p>Firebase Auth — email/password sign-in, password reset, in-page forgot-password flow, session persistence.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📦</div>
+          <h4>Offline Storage</h4>
+          <p>IndexedDB via <code>DBHelper.js</code> — all documents stored locally first. No internet required to upload or view.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">☁️</div>
+          <h4>Cloud Sync</h4>
+          <p>Firestore + Firebase Storage sync via <code>FirebaseSyncManager</code>. Pending queue survives network drops.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📱</div>
+          <h4>PWA</h4>
+          <p>Installable on Android, iOS, Windows, and macOS. App shortcuts, share target, maskable icons.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🔍</div>
+          <h4>Search &amp; Filter</h4>
+          <p>Real-time search by filename. Filter by encrypted, favorites, or all. Sort by date or name.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🗑️</div>
+          <h4>Trash &amp; Restore</h4>
+          <p>Soft-delete with 30-day retention. One-click restore or permanent purge. Bulk operations supported.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="section" id="sec-features">
+      <div class="section-head">
+        <h2>Features</h2>
+        <p>Everything built into e-DocSafe v1.2.0.</p>
+      </div>
+
+      <h3>🔐 Security</h3>
+      <ul class="feature-list">
+        <li><span class="fi">✓</span> Firebase Authentication — secure email/password, session management</li>
+        <li><span class="fi">✓</span> AES-256 client-side encryption before any cloud upload</li>
+        <li><span class="fi">✓</span> TLS 1.3 for all Firebase communication</li>
+        <li><span class="fi">✓</span> Firestore + Storage Security Rules (per-user UID isolation)</li>
+        <li><span class="fi">✓</span> IndexedDB sandboxed per browser origin</li>
+        <li><span class="fi">✓</span> Configurable auto-lock on inactivity</li>
+      </ul>
+
+      <h3>📁 Document Management</h3>
+      <ul class="feature-list">
+        <li><span class="fi">✓</span> Upload via file picker or drag-and-drop</li>
+        <li><span class="fi">✓</span> In-browser preview — PDF, DOCX, XLSX, images, plain text</li>
+        <li><span class="fi">✓</span> Rename, delete (soft), restore, and permanently purge</li>
+        <li><span class="fi">✓</span> Favorites for quick access</li>
+        <li><span class="fi">✓</span> Bulk operations — clear all, restore all, delete selected</li>
+        <li><span class="fi">✓</span> 30-day trash retention with expiry</li>
+        <li><span class="fi">✓</span> Sort by date and name, filter by type</li>
+        <li><span class="fi">✓</span> Grid and list view toggle</li>
+      </ul>
+
+      <h3>☁️ Offline-First Sync</h3>
+      <ul class="feature-list">
+        <li><span class="fi">✓</span> Saved to IndexedDB immediately — no internet required</li>
+        <li><span class="fi">✓</span> Background sync to Firestore + Storage when online</li>
+        <li><span class="fi">✓</span> Timestamp-based conflict resolution</li>
+        <li><span class="fi">✓</span> Pending sync queue (survives extended offline)</li>
+        <li><span class="fi">✓</span> Online/offline status indicator</li>
+      </ul>
+
+      <h3>🔗 Sharing</h3>
+      <ul class="feature-list">
+        <li><span class="fi">✓</span> Secure time-limited share links</li>
+        <li><span class="fi">✓</span> Optional password protection per link</li>
+        <li><span class="fi">✓</span> Configurable view-only / download permissions</li>
+        <li><span class="fi">✓</span> Share via email or Web Share API</li>
+      </ul>
+
+      <h3>📊 Analytics &amp; Activity</h3>
+      <ul class="feature-list">
+        <li><span class="fi">✓</span> Upload history chart (Chart.js)</li>
+        <li><span class="fi">✓</span> File type distribution chart</li>
+        <li><span class="fi">✓</span> Activity feed with CSV export</li>
+        <li><span class="fi">✓</span> Dark/light mode toggle (persisted)</li>
+      </ul>
+    </section>
+
+    <!-- TECH STACK -->
+    <section class="section" id="sec-stack">
+      <div class="section-head">
+        <h2>Tech Stack</h2>
+        <p>No frameworks. Vanilla JS throughout — fast, maintainable, zero build step.</p>
+      </div>
+
+      <h3>Frontend</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>HTML5 / CSS3</td><td>Structure and styling</td></tr>
+            <tr><td>Vanilla JS (ES6+)</td><td>All application logic — no framework dependency</td></tr>
+            <tr><td>CSS Grid / Flexbox</td><td>Responsive layouts</td></tr>
+            <tr><td>CSS Custom Properties</td><td>Theme tokens for dark/light mode</td></tr>
+            <tr><td>Font Awesome 6</td><td>Icons throughout the platform</td></tr>
+            <tr><td>Google Fonts (Inter + Poppins)</td><td>Typography</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Storage &amp; Sync</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>IndexedDB (DBHelper.js)</td><td>Offline-first local document storage</td></tr>
+            <tr><td>Firebase Firestore</td><td>Cloud metadata sync and real-time updates</td></tr>
+            <tr><td>Firebase Storage</td><td>Cloud backup of document files</td></tr>
+            <tr><td>localStorage</td><td>User preferences, pending sync queue, theme</td></tr>
+            <tr><td>Service Worker Cache API</td><td>App shell caching for offline access</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Firebase Backend Services</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Service</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>Firebase Authentication</td><td>Sign-up, sign-in, password reset, session management</td></tr>
+            <tr><td>Cloud Firestore</td><td>NoSQL document metadata database</td></tr>
+            <tr><td>Firebase Storage</td><td>Binary file cloud storage</td></tr>
+            <tr><td>Firebase Hosting</td><td>Optional static hosting (<code>e-docsafe.web.app</code>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Document Rendering Libraries</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Library</th><th>Renders</th></tr></thead>
+          <tbody>
+            <tr><td>PDF.js 2.6</td><td>PDF documents</td></tr>
+            <tr><td>Mammoth.js 1.4</td><td>DOCX / DOC files</td></tr>
+            <tr><td>SheetJS 0.18</td><td>XLSX / XLS spreadsheets</td></tr>
+            <tr><td>Marked.js</td><td>Markdown files</td></tr>
+            <tr><td>Chart.js</td><td>Analytics charts</td></tr>
+            <tr><td>HTML5 &lt;img&gt;</td><td>JPEG, PNG, WEBP, GIF</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FILE STRUCTURE -->
+    <section class="section" id="sec-structure">
+      <div class="section-head">
+        <h2>File Structure</h2>
+        <p>All files sit in the repository root. No build step required.</p>
+      </div>
+
+      <div class="file-tree">
+<span class="tree-dir">e-docsafe/</span>
+│
+├── <span class="tree-file">index.html</span>                    <span class="tree-comment">← Main platform (dashboard, docs, upload, settings)</span>
+├── <span class="tree-file">Sign-In.html</span>                  <span class="tree-comment">← Login page with forgot-password modal</span>
+├── <span class="tree-file">Sign-Up.html</span>                  <span class="tree-comment">← Registration page</span>
+├── <span class="tree-file">Landing-page.html</span>             <span class="tree-comment">← Account deletion countdown page</span>
+├── <span class="tree-file">Terms.html</span>                    <span class="tree-comment">← Terms of Service</span>
+├── <span class="tree-file">Privacy-policy.html</span>           <span class="tree-comment">← Privacy Policy</span>
+│
+├── <span class="tree-file">e-DocSafe-platform.css</span>        <span class="tree-comment">← Main platform stylesheet (3,800+ lines)</span>
+├── <span class="tree-file">styles.css</span>                    <span class="tree-comment">← Auth pages stylesheet (Sign-In / Sign-Up)</span>
+│
+├── <span class="tree-file">e-DocSafe.js</span>                  <span class="tree-comment">← Core app logic — CRUD, UI, charts, search</span>
+├── <span class="tree-file">auth.js</span>                       <span class="tree-comment">← Auth logic — sign-in/up, forgot password</span>
+├── <span class="tree-file">DBHelper.js</span>                   <span class="tree-comment">← IndexedDB abstraction layer</span>
+├── <span class="tree-file">UploadModal.js</span>                <span class="tree-comment">← Upload modal — validation, FileReader, progress</span>
+│
+├── <span class="tree-file">firebase-config.js</span>            <span class="tree-comment">← Firebase init and service exports (no defer)</span>
+├── <span class="tree-file">firebase-auth.js</span>              <span class="tree-comment">← SimpleAuthManager class</span>
+├── <span class="tree-file">firebase-sync.js</span>              <span class="tree-comment">← FirebaseSyncManager — real-time listener, queue</span>
+├── <span class="tree-file">firebase-service-worker.js</span>    <span class="tree-comment">← PWA service worker (caching + background sync)</span>
+│
+├── <span class="tree-file">manifest.json</span>                 <span class="tree-comment">← PWA manifest — icons, shortcuts, share target</span>
+├── <span class="tree-file">firebase.json</span>                 <span class="tree-comment">← Firebase CLI config</span>
+├── <span class="tree-file">firestore.rules</span>               <span class="tree-comment">← Firestore Security Rules</span>
+├── <span class="tree-file">firestore.indexes.json</span>        <span class="tree-comment">← Composite indexes</span>
+├── <span class="tree-file">storage.rules</span>                 <span class="tree-comment">← Storage Security Rules</span>
+├── <span class="tree-file">.nojekyll</span>                     <span class="tree-comment">← Disables GitHub Pages Jekyll processing</span>
+│
+├── <span class="tree-file">e-DocSafe-favicon.ico</span>
+├── <span class="tree-file">e-DocSafe-logo.png</span>
+└── <span class="tree-dir">icons/</span>                         <span class="tree-comment">← PWA icons (72 → 512px, maskable 192 + 512)</span>
+      </div>
+
+      <h3>Script Load Order</h3>
+      <p>The load order matters. <code>firebase-config.js</code> runs synchronously in <code>&lt;head&gt;</code> so the Firebase globals exist before any deferred script runs.</p>
+      <pre><code><span class="comment">&lt;!-- head (no defer) --&gt;</span>
+&lt;script src=<span class="str">"firebase-app-compat.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"firebase-auth-compat.js"</span>&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"firebase-config.js"</span>&gt;&lt;/script&gt;
+
+<span class="comment">&lt;!-- body (all defer, in order) --&gt;</span>
+&lt;script src=<span class="str">"DBHelper.js"</span> defer&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"firebase-auth.js"</span> defer&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"firebase-sync.js"</span> defer&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"UploadModal.js"</span> defer&gt;&lt;/script&gt;
+&lt;script src=<span class="str">"e-DocSafe.js"</span> defer&gt;&lt;/script&gt;</code></pre>
+    </section>
+
+    <!-- GETTING STARTED -->
+    <section class="section" id="sec-start">
+      <div class="section-head">
+        <h2>Getting Started</h2>
+        <p>Running locally takes under two minutes. Firebase setup is optional for local testing.</p>
+      </div>
+
+      <h3>Prerequisites</h3>
+      <ul>
+        <li>Modern browser — Chrome 90+, Firefox 88+, Edge 90+, Safari 15+</li>
+        <li><a href="https://firebase.google.com/" target="_blank">Firebase account</a> (free Spark plan is enough)</li>
+        <li>Node.js v18+ (only needed for Firebase CLI)</li>
+        <li>Git</li>
+      </ul>
+
+      <h3>Local Development</h3>
+      <pre><code><span class="comment"># Clone the repository</span>
+<span class="cmd">git clone</span> https://github.com/your-username/e-docsafe.git
+<span class="cmd">cd</span> e-docsafe
+
+<span class="comment"># Serve locally — pick one method</span>
+
+<span class="comment"># Option A: VS Code Live Server (recommended)</span>
+<span class="comment">#   Right-click index.html → "Open with Live Server"</span>
+
+<span class="comment"># Option B: npx serve</span>
+<span class="cmd">npx serve</span> . -p 5500
+
+<span class="comment"># Option C: Python</span>
+<span class="cmd">python3 -m http.server</span> 5500
+
+<span class="comment"># Then open: http://localhost:5500</span></code></pre>
+
+      <div class="callout callout-info">
+        <span class="callout-icon">ℹ</span>
+        <span class="callout-text">The Service Worker requires HTTPS to register. On <code>localhost</code>, all major browsers treat HTTP as a secure origin — no HTTPS setup needed for local development.</span>
+      </div>
+
+      <h3>Firebase Setup</h3>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>Create a Firebase project</strong>
+            <p>Go to <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → Add project → name it <code>e-docsafe</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>Enable Authentication</strong>
+            <p>Build → Authentication → Sign-in method → Email/Password → Enable.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Create Firestore database</strong>
+            <p>Build → Firestore Database → Create database → Start in <strong>production mode</strong>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>Enable Cloud Storage</strong>
+            <p>Build → Storage → Get started → Accept the default rules for now.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-body">
+            <strong>Copy your config into firebase-config.js</strong>
+            <p>Project settings → Your apps → Firebase SDK snippet → Config. Paste the config object into <code>firebase-config.js</code>.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">6</div>
+          <div class="step-body">
+            <strong>Deploy Security Rules</strong>
+            <p>Run: <code>firebase deploy --only firestore:rules,storage</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">7</div>
+          <div class="step-body">
+            <strong>Authorise your domain</strong>
+            <p>Authentication → Settings → Authorised domains → Add <code>your-username.github.io</code> (or your custom domain).</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECURITY -->
+    <section class="section" id="sec-security">
+      <div class="section-head">
+        <h2>Security Architecture</h2>
+        <p>Files are encrypted client-side before they ever leave the browser. The server only ever sees ciphertext.</p>
+      </div>
+
+      <div class="arch-wrap">
+        <svg viewBox="0 0 680 340" width="100%" style="max-width:680px;display:block;margin:0 auto;" aria-label="Security architecture diagram" role="img">
+          <!-- Browser box -->
+          <rect x="20" y="20" width="300" height="300" rx="12" fill="none" stroke="#1e2d45" stroke-width="1.5"/>
+          <text x="170" y="44" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#4d6485" letter-spacing="1">USER'S BROWSER</text>
+
+          <rect x="40" y="56" width="120" height="44" rx="7" fill="#1a2236" stroke="#1e2d45"/>
+          <text x="100" y="76" text-anchor="middle" font-family="Inter" font-size="11" fill="#e8edf5">User Files</text>
+          <text x="100" y="91" text-anchor="middle" font-family="Inter" font-size="10" fill="#4d6485">any format</text>
+
+          <text x="170" y="85" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#3b8bff">AES-256 ──────▶</text>
+
+          <rect x="200" y="56" width="100" height="44" rx="7" fill="#1a2236" stroke="#1e2d45"/>
+          <text x="250" y="76" text-anchor="middle" font-family="Inter" font-size="11" fill="#e8edf5">IndexedDB</text>
+          <text x="250" y="91" text-anchor="middle" font-family="Inter" font-size="10" fill="#4d6485">local store</text>
+
+          <!-- Arrow down from IndexedDB -->
+          <line x1="250" y1="100" x2="250" y2="130" stroke="#1e2d45" stroke-width="1.5" stroke-dasharray="4 3"/>
+          <text x="258" y="120" font-family="IBM Plex Mono" font-size="9" fill="#4d6485">online?</text>
+
+          <rect x="40" y="140" width="260" height="60" rx="7" fill="#111827" stroke="#1e2d45"/>
+          <text x="170" y="163" text-anchor="middle" font-family="Inter" font-size="11" fill="#8fa3be">firebase-sync.js</text>
+          <text x="170" y="179" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#3b8bff">FirebaseSyncManager</text>
+          <text x="170" y="193" text-anchor="middle" font-family="Inter" font-size="10" fill="#4d6485">pending queue · timestamp merge</text>
+
+          <!-- Arrow right to Firebase box -->
+          <line x1="320" y1="170" x2="380" y2="170" stroke="#1e2d45" stroke-width="1.5"/>
+          <text x="345" y="163" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#4d6485">TLS 1.3</text>
+          <polygon points="380,165 390,170 380,175" fill="#1e2d45"/>
+
+          <!-- Firebase box -->
+          <rect x="390" y="20" width="270" height="300" rx="12" fill="none" stroke="#1e2d45" stroke-width="1.5"/>
+          <text x="525" y="44" text-anchor="middle" font-family="IBM Plex Mono" font-size="10" fill="#4d6485" letter-spacing="1">FIREBASE CLOUD</text>
+
+          <rect x="410" y="56" width="230" height="58" rx="7" fill="#1a2236" stroke="#1e2d45"/>
+          <text x="525" y="77" text-anchor="middle" font-family="Inter" font-size="11" fill="#e8edf5" font-weight="600">Firebase Auth</text>
+          <text x="525" y="93" text-anchor="middle" font-family="Inter" font-size="10" fill="#4d6485">session tokens · auto-expiry</text>
+          <text x="525" y="107" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#22c55e">✓ Authorised domains enforced</text>
+
+          <rect x="410" y="130" width="230" height="68" rx="7" fill="#1a2236" stroke="#1e2d45"/>
+          <text x="525" y="151" text-anchor="middle" font-family="Inter" font-size="11" fill="#e8edf5" font-weight="600">Cloud Firestore</text>
+          <text x="525" y="167" text-anchor="middle" font-family="Inter" font-size="10" fill="#4d6485">document metadata</text>
+          <text x="525" y="183" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#22c55e">✓ Per-user Security Rules</text>
+          <text x="525" y="197" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#22c55e">✓ UID-scoped read/write</text>
+
+          <rect x="410" y="214" width="230" height="84" rx="7" fill="#1a2236" stroke="#1e2d45"/>
+          <text x="525" y="235" text-anchor="middle" font-family="Inter" font-size="11" fill="#e8edf5" font-weight="600">Cloud Storage</text>
+          <text x="525" y="251" text-anchor="middle" font-family="Inter" font-size="10" fill="#4d6485">encrypted file backups</text>
+          <text x="525" y="267" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#22c55e">✓ Per-user Security Rules</text>
+          <text x="525" y="283" text-anchor="middle" font-family="IBM Plex Mono" font-size="9" fill="#22c55e">✓ MIME whitelist · 50 MB limit</text>
+        </svg>
+      </div>
+
+      <h3>Security Measures</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Layer</th><th>Mechanism</th></tr></thead>
+          <tbody>
+            <tr><td>Authentication</td><td>Firebase Auth — email/password, session tokens, auto-expiry</td></tr>
+            <tr><td>Local isolation</td><td>IndexedDB sandboxed per browser origin</td></tr>
+            <tr><td>At rest</td><td>AES-256 client-side — server never sees plaintext</td></tr>
+            <tr><td>In transit</td><td>TLS 1.3 for all Firebase communication</td></tr>
+            <tr><td>Cloud access control</td><td>Firestore + Storage Security Rules (per-user UID)</td></tr>
+            <tr><td>File type control</td><td>Storage Rules MIME whitelist — no executables or archives</td></tr>
+            <tr><td>File size control</td><td>50 MB per-file enforced in UploadModal.js and Storage Rules</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- DEPLOYMENT -->
+    <section class="section" id="sec-deploy">
+      <div class="section-head">
+        <h2>Deployment</h2>
+        <p>e-DocSafe deploys to both GitHub Pages (zero cost) and Firebase Hosting.</p>
+      </div>
+
+      <h3>GitHub Pages</h3>
+      <pre><code><span class="comment"># Push to GitHub</span>
+<span class="cmd">git init</span>
+<span class="cmd">git add</span> .
+<span class="cmd">git commit</span> -m "Initial e-DocSafe deployment"
+<span class="cmd">git branch</span> -M main
+<span class="cmd">git remote add origin</span> https://github.com/your-username/e-docsafe.git
+<span class="cmd">git push</span> -u origin main</code></pre>
+
+      <p>Then: <strong>Repo → Settings → Pages → Source: Deploy from branch → main → / (root)</strong></p>
+      <p>Live at: <code>https://your-username.github.io/e-docsafe/</code></p>
+
+      <div class="callout callout-warn">
+        <span class="callout-icon">⚠</span>
+        <div>
+          <strong>Add your domain to Firebase Auth.</strong>
+          <span class="callout-text"> After deploying, go to Firebase → Authentication → Settings → Authorised domains → add <code>your-username.github.io</code>. Without this, sign-in fails with <code>auth/unauthorized-domain</code>.</span>
+        </div>
+      </div>
+
+      <h3>Firebase Hosting</h3>
+      <pre><code><span class="comment"># Install Firebase CLI</span>
+<span class="cmd">npm install</span> -g firebase-tools
+
+<span class="comment"># Login and initialise</span>
+<span class="cmd">firebase login</span>
+<span class="cmd">firebase init</span>
+
+<span class="comment"># Deploy everything</span>
+<span class="cmd">firebase deploy</span>
+
+<span class="comment"># Deploy site only (skip rules)</span>
+<span class="cmd">firebase deploy</span> --only hosting
+
+<span class="comment"># Preview channel (2 days)</span>
+<span class="cmd">firebase hosting:channel:deploy</span> preview --expires 2d</code></pre>
+
+      <p>Live at: <code>https://e-docsafe.web.app</code> and <code>https://e-docsafe.firebaseapp.com</code></p>
+    </section>
+
+    <!-- PWA -->
+    <section class="section" id="sec-pwa">
+      <div class="section-head">
+        <h2>PWA Support</h2>
+        <p>e-DocSafe is a fully compliant Progressive Web App — installable, offline-capable, and integrated with the OS.</p>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>Installable (Add to Home Screen)</td><td><span class="badge badge-green">✓ Ready</span></td><td>Android, iOS, Windows, macOS, Linux</td></tr>
+            <tr><td>Offline access</td><td><span class="badge badge-green">✓ Ready</span></td><td>Service Worker caches the full app shell</td></tr>
+            <tr><td>Background sync</td><td><span class="badge badge-green">✓ Ready</span></td><td>Queues uploads offline, syncs on reconnect</td></tr>
+            <tr><td>App shortcuts</td><td><span class="badge badge-green">✓ Ready</span></td><td>Upload, Documents, Favorites</td></tr>
+            <tr><td>Share target</td><td><span class="badge badge-green">✓ Ready</span></td><td>Receive files from other Android apps</td></tr>
+            <tr><td>Maskable icons</td><td><span class="badge badge-green">✓ Ready</span></td><td>192px and 512px, safe-zone compliant</td></tr>
+            <tr><td>Themed splash screen</td><td><span class="badge badge-green">✓ Ready</span></td><td>Brand colours from manifest</td></tr>
+            <tr><td>iOS background sync</td><td><span class="badge badge-yellow">⚠ Partial</span></td><td>Safari WebKit restricts background sync</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Generating Icons</h3>
+      <p>Use <a href="https://maskable.app/editor" target="_blank">maskable.app/editor</a> to generate all required sizes from <code>e-DocSafe-logo.png</code>. Export to the <code>/icons/</code> directory. Minimum set: 192×192 and 512×512 maskable; 72, 96, 128, 144, 152, 384px for broad device support.</p>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="section" id="sec-roadmap">
+      <div class="section-head">
+        <h2>Roadmap</h2>
+        <p>What's shipped and what's next.</p>
+      </div>
+
+      <h3>v1.2.0 — Current</h3>
+      <div style="margin-bottom:28px;">
+        <div class="roadmap-item"><span class="check">✓</span> Offline-first IndexedDB storage</div>
+        <div class="roadmap-item"><span class="check">✓</span> Firebase Auth + Firestore + Storage sync</div>
+        <div class="roadmap-item"><span class="check">✓</span> AES-256 client-side encryption</div>
+        <div class="roadmap-item"><span class="check">✓</span> PWA — installable, offline, app shortcuts</div>
+        <div class="roadmap-item"><span class="check">✓</span> In-browser document previews</div>
+        <div class="roadmap-item"><span class="check">✓</span> Dark mode / light mode</div>
+        <div class="roadmap-item"><span class="check">✓</span> Share links with password protection</div>
+        <div class="roadmap-item"><span class="check">✓</span> Activity feed with CSV export</div>
+        <div class="roadmap-item"><span class="check">✓</span> Analytics dashboard (Chart.js)</div>
+      </div>
+
+      <h3>v1.3.0 — Next</h3>
+      <div style="margin-bottom:28px;">
+        <div class="roadmap-item"><span class="todo">○</span> End-to-end encryption key management UI</div>
+        <div class="roadmap-item"><span class="todo">○</span> OCR integration for in-document text search</div>
+        <div class="roadmap-item"><span class="todo">○</span> Bulk download as ZIP</div>
+        <div class="roadmap-item"><span class="todo">○</span> Document expiry and reminder notifications</div>
+        <div class="roadmap-item"><span class="todo">○</span> Push notifications for share activity</div>
+      </div>
+
+      <h3>v2.0 — Future</h3>
+      <div>
+        <div class="roadmap-item"><span class="todo">○</span> Multi-user access control (viewer / editor / admin roles)</div>
+        <div class="roadmap-item"><span class="todo">○</span> Real-time collaborative annotations</div>
+        <div class="roadmap-item"><span class="todo">○</span> AI-powered document categorisation</div>
+        <div class="roadmap-item"><span class="todo">○</span> Multi-cloud backup (Google Drive + AWS S3)</div>
+        <div class="roadmap-item"><span class="todo">○</span> Native mobile apps (Flutter — Android + iOS)</div>
+        <div class="roadmap-item"><span class="todo">○</span> Digital signature support</div>
+        <div class="roadmap-item"><span class="todo">○</span> Swahili language support</div>
+      </div>
+    </section>
+
+    <!-- CONTRIBUTING -->
+    <section class="section" id="sec-contributing">
+      <div class="section-head">
+        <h2>Contributing</h2>
+        <p>Contributions are welcome. Please follow the coding conventions used throughout the project.</p>
+      </div>
+
+      <pre><code><span class="comment"># 1. Fork the repository on GitHub</span>
+
+<span class="comment"># 2. Create a feature branch</span>
+<span class="cmd">git checkout</span> -b feature/your-feature-name
+
+<span class="comment"># 3. Make your changes, then commit</span>
+<span class="cmd">git commit</span> -m "feat: describe your change clearly"
+
+<span class="comment"># 4. Push and open a Pull Request</span>
+<span class="cmd">git push origin</span> feature/your-feature-name</code></pre>
+
+      <h3>Code Conventions</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Rule</th><th>Detail</th></tr></thead>
+          <tbody>
+            <tr><td>No frameworks</td><td>Vanilla JS only — no React, Vue, Angular, or jQuery</td></tr>
+            <tr><td>Async style</td><td>Use <code>async/await</code> over raw <code>.then()</code> chains</td></tr>
+            <tr><td>IndexedDB writes</td><td>Always use <code>addDocWithSync()</code> — never bare <code>db.transaction()</code></td></tr>
+            <tr><td>User feedback</td><td>Always <code>showNotification('success'|'error'|'info', msg)</code> — never <code>alert()</code></td></tr>
+            <tr><td>Modals</td><td>Never <code>prompt()</code> or <code>confirm()</code> — use the existing <code>#confirmationModal</code></td></tr>
+            <tr><td>DOM access</td><td>Resolve at <code>DOMContentLoaded</code> — never at parse time</td></tr>
+            <tr><td>Error handling</td><td>Every <code>async</code> function must have a <code>try/catch</code></td></tr>
+            <tr><td>Indent / quotes</td><td>2 spaces · single quotes · <code>'use strict'</code> at top of every JS file</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- AUTHOR -->
+    <section class="section" id="sec-author">
+      <div class="section-head">
+        <h2>Author &amp; License</h2>
+        <p>Built in Kenya, for the world.</p>
+      </div>
+
+      <div class="author-card">
+        <div class="author-avatar">KG</div>
+        <div class="author-info">
+          <h3>Kelvin Mwichwiri Gitonga</h3>
+          <p class="role">Diploma in Information &amp; Communication Technology<br>Mukiria Technical Training Institute, Kenya<br><strong>Developer &amp; Maintainer:</strong> Kelvinet Technologies</p>
+          <div class="contact">
+            <a class="contact-chip" href="mailto:support@e-docsafe.com">📧 support@e-docsafe.com</a>
+            <a class="contact-chip" href="https://www.edocsafe.com" target="_blank">🌐 www.edocsafe.com</a>
+            <span class="contact-chip">📍 Konza City, Kenya</span>
+          </div>
+        </div>
+      </div>
+
+      <h3>License</h3>
+      <div class="callout callout-info" style="margin-bottom:20px;">
+        <span class="callout-icon">⚖</span>
+        <div>
+          <strong>MIT License</strong>
+          <span class="callout-text"> — Free to use, modify, and distribute. Copyright © 2025 Kelvinet Technologies.</span>
+        </div>
+      </div>
+      <pre><code>MIT License
+
+Copyright (c) 2025 Kelvinet Technologies
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</code></pre>
+
+      <p style="text-align:center;margin-top:40px;color:var(--fg3);font-size:13px;">
+        Built with ❤️ in Kenya &nbsp;·&nbsp;
+        <a href="Privacy-policy.html" style="color:var(--fg3);">Privacy Policy</a> &nbsp;·&nbsp;
+        <a href="Terms.html" style="color:var(--fg3);">Terms of Service</a> &nbsp;·&nbsp;
+        © 2025 Kelvinet Technologies
+      </p>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  // ── Navigation ────────────────────────────────────────────────────────────
+  const navLinks = document.querySelectorAll('.nav-link[data-section]');
+  const sections = document.querySelectorAll('.section');
+
+  function showSection(id) {
+    sections.forEach(s => s.classList.remove('active'));
+    navLinks.forEach(l => l.classList.remove('active'));
+    const sec = document.getElementById('sec-' + id);
+    const link = document.querySelector(`[data-section="${id}"]`);
+    if (sec) sec.classList.add('active');
+    if (link) link.classList.add('active');
+    document.getElementById('content').scrollTop = 0;
+    // Close mobile nav
+    sidenav.classList.remove('open');
+    overlay.classList.remove('open');
+  }
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => showSection(link.dataset.section));
+  });
+
+  // ── Mobile menu ───────────────────────────────────────────────────────────
+  const sidenav = document.getElementById('sidenav');
+  const overlay = document.getElementById('overlay');
+  const menuBtn = document.getElementById('menuBtn');
+
+  menuBtn.addEventListener('click', () => {
+    const open = sidenav.classList.toggle('open');
+    overlay.classList.toggle('open', open);
+  });
+  overlay.addEventListener('click', () => {
+    sidenav.classList.remove('open');
+    overlay.classList.remove('open');
+  });
+
+  // ── Theme toggle ──────────────────────────────────────────────────────────
+  const themeBtn = document.getElementById('themeBtn');
+  let theme = 'auto';
+  try { theme = localStorage.getItem('edocsafe-readme-theme') || 'auto'; } catch(e) {}
+
+  function applyTheme(t) {
+    const root = document.documentElement;
+    if (t === 'light') { root.setAttribute('data-theme', 'light'); themeBtn.textContent = '☾'; }
+    else if (t === 'dark') { root.setAttribute('data-theme', 'dark'); themeBtn.textContent = '☀'; }
+    else { root.removeAttribute('data-theme'); themeBtn.textContent = '◑'; }
+  }
+  applyTheme(theme);
+
+  themeBtn.addEventListener('click', () => {
+    theme = theme === 'auto' ? 'dark' : theme === 'dark' ? 'light' : 'auto';
+    applyTheme(theme);
+    try { localStorage.setItem('edocsafe-readme-theme', theme); } catch(e) {}
+  });
+</script>
+
+</body></html>

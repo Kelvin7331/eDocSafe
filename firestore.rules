@@ -1,0 +1,75 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidDocument() {
+      let data = request.resource.data;
+      return data.keys().hasAll(['name', 'type', 'uploadedAt', 'userId'])
+        && data.name is string
+        && data.name.size() > 0
+        && data.name.size() <= 255
+        && data.type is string
+        && data.userId == request.auth.uid;
+    }
+
+    // ── User profile documents ────────────────────────────────────────────────
+    // Path: /users/{userId}
+    match /users/{userId} {
+
+      // Users can only read their own profile
+      allow read: if isOwner(userId);
+
+      // Create: must be the owner, provide required fields, and
+      // the email must match the authenticated user's email
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['name', 'email', 'createdAt'])
+        && request.resource.data.email == request.auth.token.email;
+
+      // Update: must be the owner; cannot change userId or
+      // inflate storageLimit beyond 500 MB
+      allow update: if isOwner(userId)
+        && (!request.resource.data.keys().hasAny(['uid']))
+        && (
+          !('storageLimit' in request.resource.data)
+          || request.resource.data.storageLimit <= 500
+        );
+
+      // Delete: only the owner can delete their profile
+      allow delete: if isOwner(userId);
+    }
+
+    // ── User documents sub-collection ─────────────────────────────────────────
+    // Path: /users/{userId}/documents/{documentId}
+    match /users/{userId}/documents/{documentId} {
+
+      // Read: only the document owner
+      allow read: if isOwner(userId);
+
+      // Create: must be authenticated, own the document, pass field validation
+      allow create: if isOwner(userId) && isValidDocument();
+
+      // Update: owner only; userId field cannot change (prevents ownership transfer)
+      allow update: if isOwner(userId)
+        && request.resource.data.userId == resource.data.userId;
+
+      // Delete: owner only
+      allow delete: if isOwner(userId);
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
+    // Any path not explicitly matched above is rejected
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO -->
+  <meta name="description" content="e-DocSafe — Secure, Smart, and Accessible document management platform with offline-first storage, cloud sync, and PWA support.">
+  <meta name="keywords" content="document management, e-DocSafe, secure storage, PWA, Firebase, IndexedDB">
+  <meta name="author" content="Kelvin Mwichwiri">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="e-DocSafe – Secure Document Storage Platform">
+  <meta property="og:description" content="Store, manage, and share your important documents securely with e-DocSafe's encrypted cloud platform.">
+  <meta property="og:image" content="/assets/og-image.png">
+  <meta property="og:url" content="https://www.edocsafe.com">
+  <meta property="og:type" content="website">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@eDocSafePlatform">
+  <meta name="twitter:title" content="e-DocSafe – Secure Document Storage">
+  <meta name="twitter:description" content="Encrypted cloud storage for your certificates, CVs, and important records.">
+  <meta name="twitter:image" content="/assets/twitter-card.png">
+
+  <title>e-DocSafe | A Secure Digital Document Management Platform</title>
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.json">
+  <!-- Favicon -->
+  <link rel="icon" href="e-DocSafe-favicon.ico" type="image/x-icon">
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="e-DocSafe">
+  <!-- Theme colour -->
+  <meta name="theme-color" content="#27ae60">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+  <!-- Platform stylesheet -->
+  <link rel="stylesheet" href="e-DocSafe-platform.css">
+
+  <!-- Third-party libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.4.2/mammoth.browser.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+  <!-- Firebase config (must load before any auth/sync scripts) -->
+  <script src="firebase-config.js"></script>
+</head>
+<body>
+
+  <!-- Skip link for screen readers / keyboard users -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- Sidebar backdrop for mobile (tapping it closes the sidebar) -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" aria-hidden="true" onclick="toggleSidebar()"></div>
+
+  <div class="container">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main navigation">
+      <div class="nav-logo">
+        <img src="e-DocSafe-logo.png" loading="lazy" alt="e-DocSafe Logo">
+      </div>
+
+      <!-- FIXED: menu items converted from div+onclick to button for keyboard accessibility -->
+      <nav class="menu" role="menubar" aria-label="Platform sections">
+
+        <button class="menu-item active" role="menuitem" data-target="dashboard"
+                onclick="activateMenu(this)" aria-current="page">
+          <i class="fas fa-home" aria-hidden="true"></i>
+          <span class="label">Dashboard</span>
+        </button>
+
+        <button class="menu-item" role="menuitem" data-target="docs" onclick="activateMenu(this)">
+          <i class="fas fa-folder" aria-hidden="true"></i>
+          <span class="label">My Documents</span>
+        </button>
+
+        <button class="menu-item" role="menuitem" data-target="upload" onclick="activateMenu(this)">
+          <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+          <span class="label">Upload</span>
+        </button>
+
+        <button class="menu-item" role="menuitem" data-target="shared" onclick="activateMenu(this)">
+          <i class="fas fa-user-friends" aria-hidden="true"></i>
+          <span class="label">Shared With Me</span>
+        </button>
+
+        <button class="menu-item" role="menuitem" data-target="favorites" onclick="activateMenu(this)">
+          <i class="fas fa-star" aria-hidden="true"></i>
+          <span class="label">Favorites</span>
+        </button>
+
+        <button class="menu-item" role="menuitem" data-target="feed" onclick="activateMenu(this)">
+          <i class="fas fa-history" aria-hidden="true"></i>
+          <span class="label">Activity Feed</span>
+        </button>
+
+        <div class="admin-section">
+          <button class="menu-item" role="menuitem" data-target="auditLogs" onclick="activateMenu(this)">
+            <i class="fas fa-chart-line" aria-hidden="true"></i>
+            <span class="label">Activity Logs</span>
+          </button>
+
+          <button class="menu-item" role="menuitem" data-target="trash" onclick="activateMenu(this)">
+            <i class="fas fa-trash" aria-hidden="true"></i>
+            <span class="label">Trash</span>
+          </button>
+
+          <button class="menu-item" role="menuitem" data-target="support" onclick="activateMenu(this)">
+            <i class="fas fa-question-circle" aria-hidden="true"></i>
+            <span class="label">Help &amp; Support</span>
+          </button>
+        </div>
+
+      </nav>
+
+      <div class="nav-footer">
+        <div class="social-links" aria-label="Social media links">
+          <a href="https://www.facebook.com/eDocSafePlatform" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="fab fa-facebook-f" aria-hidden="true"></i></a>
+          <a href="https://twitter.com/eDocSafe" target="_blank" rel="noopener noreferrer" aria-label="Twitter / X"><i class="fab fa-x-twitter" aria-hidden="true"></i></a>
+          <a href="https://www.linkedin.com/company/e-docsafe" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fab fa-linkedin-in" aria-hidden="true"></i></a>
+          <a href="https://www.instagram.com/eDocSafePlatform" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram" aria-hidden="true"></i></a>
+        </div>
+        <p>&copy; <span id="year"></span> e-DocSafe &mdash; Powered by Purpose.</p>
+        <p><a href="Privacy-policy.html">Privacy Policy</a> | <a href="Terms.html">Terms of Service</a></p>
+      </div>
+    </aside>
+
+    <!-- ── Connection toast ── -->
+    <div id="connection-toast" class="offline" role="status" aria-live="polite">
+      <i class="fa-solid fa-wifi" aria-hidden="true"></i> Checking connection...
+    </div>
+
+    <!-- ── Main content area ── -->
+    <div class="main" id="main-content">
+
+      <!-- Topbar -->
+      <header class="topbar" role="banner">
+        <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle navigation sidebar" aria-expanded="false" id="sidebarToggle">
+          <i class="fas fa-bars" aria-hidden="true"></i>
+        </button>
+
+        <div class="search" role="search">
+          <label for="topbarSearch" class="sr-only">Search documents</label>
+          <input type="search" id="topbarSearch" placeholder="Search documents . . ." autocomplete="off">
+          <i class="fas fa-search" aria-hidden="true"></i>
+          <ul id="searchSuggestions" class="suggestions-list" role="listbox" aria-label="Search suggestions"></ul>
+        </div>
+
+        <div class="topbar-actions">
+          <button class="toggle-mode" onclick="toggleDarkMode()" aria-label="Toggle dark mode">
+            <i class="fas fa-moon" aria-hidden="true"></i>
+          </button>
+
+          <div class="notification-icon">
+            <button aria-label="Notifications" onclick="openNotificationModal()">
+              <i class="fas fa-bell" id="notificationIcon" aria-hidden="true"></i>
+              <span class="notification-badge" aria-live="polite">0</span>
+            </button>
+          </div>
+
+          <button class="user-icon" id="userIcon" onclick="toggleDropdown()" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
+            KM
+          </button>
+        </div>
+
+        <!-- User dropdown -->
+        <div class="dropdown-menu" id="dropdownMenu" role="menu" aria-label="User options">
+          <div class="user-info">
+            <div class="dropdown-avatar" id="userInitials" aria-hidden="true">KM</div>
+            <div class="user-details">
+              <div class="user-name displayFullName">User</div>
+              <div class="user-email displayEmail">user@e-docsafe.com</div>
+            </div>
+          </div>
+
+          <div class="menu-section">
+            <button class="menuItem" role="menuitem" data-target="profile" onclick="activateMenu(this); closeDropdown();">
+              <i class="fas fa-user-cog" aria-hidden="true"></i>
+              <span>Profile</span>
+            </button>
+
+            <button class="menuItem" role="menuitem" data-target="appSettings" onclick="activateMenu(this); closeDropdown();">
+              <i class="fas fa-cog" aria-hidden="true"></i>
+              <span>Settings</span>
+            </button>
+
+            <button class="menuItem" role="menuitem" onclick="showAbout(); closeDropdown();">
+              <i class="fas fa-info-circle" aria-hidden="true"></i>
+              <span>About e-DocSafe</span>
+            </button>
+
+            <button class="menuItem" role="menuitem" onclick="logout()">
+              <i class="fas fa-sign-out-alt" aria-hidden="true"></i>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div class="content">
+
+        <!-- ════════════════════════════════════════
+             DASHBOARD SECTION
+        ════════════════════════════════════════ -->
+        <div id="dashboard" class="section-container">
+          <div class="section active">
+            <div class="dashboard-header">
+              <h2 class="dashboard-title" style="text-align:left; font-weight:bold; letter-spacing:-0.5px;">
+                Welcome to <rem><em>ě‑Doc</em><span>Safe</span></rem>,
+                <span id="welcomeName">User</span>!
+              </h2>
+              <p>Overview of your storage usage, recent activity, and alerts.</p>
+            </div><br>
+
+            <div class="cards">
+              <div class="stat-card">
+                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i>
+                <div>
+                  <h3>Total Uploads</h3>
+                  <p class="value" id="total-docs" style="font-size:2.5rem; font-weight:600;">0</p>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <i class="fas fa-database" aria-hidden="true"></i>
+                <div>
+                  <h3>Storage Used</h3>
+                  <p class="value" id="total-storage">0 MB</p>
+                  <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-fill" id="storage-progress"></div>
+                  </div>
+                  <p><span id="percent">0%</span> of <span id="storage">100 MB</span></p>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <i class="fas fa-file-shield" aria-hidden="true"></i>
+                <div>
+                  <h3>Encrypted Files</h3>
+                  <p class="value" id="encrypted" style="font-size:2.5rem; font-weight:600;">0</p>
+                </div>
+              </div>
+
+              <div class="stat-card" id="activitySummaryCard">
+                <i class="fas fa-clock" aria-hidden="true"></i>
+                <div>
+                  <h3>Recent Activity</h3>
+                  <p id="activitySummaryText">No activity yet</p>
+                  <small id="activityTime" style="color:#6d757d;"></small>
+                </div>
+              </div>
+
+              <div class="stat-card">
+                <i class="fas fa-history" aria-hidden="true"></i>
+                <div>
+                  <h3>Pending Approvals</h3>
+                  <p id="pending">3 Files</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick action toolbar -->
+            <div class="toolbar" role="toolbar" aria-label="Quick actions">
+              <button class="action-btn" id="quickUpload"
+                      onclick="document.getElementById('uploadModal').style.display='flex';">
+                <i class="fas fa-file-import" aria-hidden="true"></i> Upload
+              </button>
+              <button class="action-btn" id="scanActionBtn" onclick="scan()">
+                <i class="fas fa-camera" aria-hidden="true"></i> Scan
+              </button>
+              <button class="action-btn" id="shareActionBtn" onclick="showShareModal()">
+                <i class="fas fa-share-alt" aria-hidden="true"></i> Secure Share
+              </button>
+              <button class="action-btn" id="createFolderBtn" onclick="openFolderModal()">
+                <i class="fas fa-folder-plus" aria-hidden="true"></i> New Folder
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             PROFILE SECTION
+        ════════════════════════════════════════ -->
+        <div id="profile" class="section-container">
+          <div class="section active" id="profilePage">
+            <h2 class="page-title"><i class="fas fa-user" aria-hidden="true"></i> My Profile</h2>
+
+            <!-- Personal Information -->
+            <div class="profile-card">
+              <div class="card-header">
+                <div class="card-icon"><i class="fas fa-id-card" aria-hidden="true"></i></div>
+                <div>
+                  <div class="card-title">Personal Information</div>
+                  <div class="card-subtitle">Your identification details</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Full Legal Name</div>
+                    <!-- FIXED: removed hardcoded "Kelvin Mwichwiri" — populated by loadProfile() from Firebase Auth -->
+                    <div class="info-value displayFullName"></div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value displayEmail"></div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <!-- FIXED: removed hardcoded phone number -->
+                    <div class="info-value displayPhone">—</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Account Type</div>
+                    <div class="info-value">
+                      Premium
+                      <i class="fas fa-check-circle" style="color:#1D9BF0; font-size:18px;" aria-label="Verified"></i>
+                    </div>
+                  </div>
+                </div>
+                <br>
+                <button class="btn btn-primary" id="editProfileBtn">
+                  <i class="fas fa-edit" aria-hidden="true"></i> Edit Details
+                </button>
+              </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div class="profile-card">
+              <div class="card-header">
+                <div class="card-icon"><i class="fas fa-shield-alt" aria-hidden="true"></i></div>
+                <div>
+                  <div class="card-title">Security Settings</div>
+                  <div class="card-subtitle">Update your security settings</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" placeholder="Your current password" autocomplete="current-password">
+                </div>
+                <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                  <label for="confirmPassword">Confirm New Password</label>
+                  <input type="password" id="confirmPassword" autocomplete="new-password">
+                </div>
+                <hr><br>
+                <div class="profile-actions">
+                  <button type="button" id="savePassword" class="btn btn-primary">Update</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Contact Information -->
+            <div class="profile-card">
+              <div class="card-header">
+                <div class="card-icon"><i class="fas fa-envelope" aria-hidden="true"></i></div>
+                <div>
+                  <div class="card-title">Contact Information</div>
+                  <div class="card-subtitle">Your communication details</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="info-grid">
+                  <div class="info-item">
+                    <div class="info-label">Email Address</div>
+                    <div class="info-value displayEmail"></div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Phone Number</div>
+                    <div class="info-value displayPhone">—</div>
+                  </div>
+                  <div class="info-item">
+                    <div class="info-label">Notification Preferences</div>
+                    <div class="info-value">Email &amp; SMS</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="security-note">
+              <i class="fas fa-shield-alt" aria-hidden="true"></i>
+              <div>
+                <b style="color:#27ae60;">Your data is secure with e-DocSafe</b><br>
+                We use bank-level encryption and security protocols to protect your personal information.
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Profile Page (hidden until Edit is clicked) -->
+          <div class="section" id="editProfilePage" style="display:none;">
+            <button class="back-link" id="backToProfile">
+              <i class="fas fa-arrow-left" aria-hidden="true"></i> Back to Profile
+            </button>
+
+            <div class="profile-card">
+              <div class="card-header">
+                <div class="card-icon"><i class="fas fa-user-edit" aria-hidden="true"></i></div>
+                <div>
+                  <div class="card-title">Edit Personal Information</div>
+                  <div class="card-subtitle">Update your identification details</div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="form-group">
+                  <label for="editFullName">Full Legal Name</label>
+                  <input type="text" class="form-control" id="editFullName" value="" autocomplete="name">
+                </div>
+                <div class="form-group">
+                  <label for="editEmail">Email Address</label>
+                  <input type="email" class="form-control" id="editEmail" value="" autocomplete="email">
+                </div>
+                <div class="form-group">
+                  <label for="editPhone">Phone Number</label>
+                  <input type="tel" class="form-control" id="editPhone" value="" maxlength="14" autocomplete="tel">
+                </div>
+                <div class="action-buttons">
+                  <button class="btn btn-primary" id="saveProfileBtn">
+                    <i class="fas fa-save" aria-hidden="true"></i> Save Changes
+                  </button>
+                  <button class="btn btn-outline" id="cancelEditBtn">
+                    <i class="fas fa-times" aria-hidden="true"></i> Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             UPLOAD SECTION
+        ════════════════════════════════════════ -->
+        <div id="upload" class="section-container">
+          <div class="section active">
+            <h2>Secure Document Upload</h2>
+            <p>Upload your critical files to your secure storage with client-side encryption.</p><br>
+
+            <!-- FIXED: removed duplicate #fileInput and #dropZone ids — only one of each here;
+                 the actual upload input lives in the Upload Modal below -->
+            <div class="controls">
+              <button class="btn btn-primary" onclick="document.getElementById('uploadModal').style.display='flex';">
+                <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> Open Upload Dialog
+              </button>
+            </div>
+
+            <div class="status" id="statusText" aria-live="polite"></div><br>
+
+            <div id="uploadSpinner" class="hidden" aria-live="polite">
+              <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> Uploading document...
+            </div>
+
+            <div class="scan-section">
+              <h2>Scan to Upload</h2>
+              <p>Use your device's camera or a connected scanner to digitise a physical document.</p>
+              <small style="font-style:italic;">
+                <strong>Tip:</strong> Ensure the document is well-lit and flat for the best scanning quality.
+              </small><br><br>
+              <button onclick="scan()" class="scan-btn">
+                <i class="fas fa-camera" aria-hidden="true"></i> Scan Now
+              </button>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             SHARED WITH ME SECTION
+        ════════════════════════════════════════ -->
+        <div id="shared" class="section-container">
+          <div class="section active">
+            <h2>
+              Shared With Me
+              <i class="fas fa-check-circle" style="color:#1da1f2;" aria-label="Verified" aria-hidden="true"></i>
+            </h2>
+            <div class="controls">
+              <label for="sharedSearch" class="sr-only">Search shared documents</label>
+              <input type="text" class="search-input" id="sharedSearch"
+                     placeholder="Search by name or sender..." aria-label="Search shared documents">
+              <label for="typeFilter" class="sr-only">Filter by type</label>
+              <select id="typeFilter">
+                <option value="">All Types</option>
+                <option value="pdf">PDF</option>
+                <option value="docx">DOCX</option>
+                <option value="image">Image</option>
+              </select>
+            </div>
+            <p>No documents shared at the moment.</p>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             FAVORITES SECTION
+        ════════════════════════════════════════ -->
+        <div id="favorites" class="section-container">
+          <div class="section active">
+            <header class="favorites-header">
+              <h2><i class="fas fa-star" aria-hidden="true"></i> Favorites</h2>
+              <label for="favoritesSearch" class="sr-only">Search favorites</label>
+              <input type="text" class="search-input" id="favoritesSearch"
+                     placeholder="Search favorites..." aria-label="Search favorites">
+            </header><br>
+            <div class="docs-view-toggle" role="group" aria-label="View mode">
+              <button id="listViewBtn" title="List View" class="active" aria-pressed="true">
+                <i class="fas fa-bars" aria-hidden="true"></i> List
+              </button>
+              <button id="gridViewBtn" title="Grid View" aria-pressed="false">
+                <i class="fas fa-th" aria-hidden="true"></i> Grid
+              </button>
+            </div><br>
+            <div id="favoritesGrid" class="favorites-grid" role="list" aria-label="Favorite documents"></div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             ACTIVITY FEED SECTION
+        ════════════════════════════════════════ -->
+        <section id="feed" class="section-container">
+          <div class="section active">
+            <h2 class="section-title">Activity Feed</h2>
+            <div class="controls">
+              <label for="activityFilter" class="sr-only">Filter by date</label>
+              <select class="filter-dropdown" id="activityFilter" aria-label="Filter by date">
+                <option value="24h">Last 24 hours</option>
+                <option value="7d">Last Week</option>
+                <option value="30d">Last Month</option>
+              </select>
+              <input type="file" id="importCsvInput" accept=".csv" hidden onchange="importActivityCSV(event)">
+              <button class="btn" onclick="exportActivity()">Export CSV</button>
+            </div>
+            <div id="activityFeed" class="activity-feed" role="list" aria-label="Activity items">
+              <div class="no-activity">
+                <p>No recent activity to display.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ════════════════════════════════════════
+             SETTINGS SECTION
+        ════════════════════════════════════════ -->
+        <div id="appSettings" class="section-container">
+          <div class="section active">
+            <h2>App Settings</h2>
+
+            <div class="grid-setting">
+
+              <!-- Sign-in & Security -->
+              <h3 class="section-subtitle">Sign-in &amp; Security</h3>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="setting-icon"><i class="fas fa-lock" aria-hidden="true"></i></div>
+                  <div class="setting-title">Sign-in &amp; Security</div>
+                </div>
+                <div class="setting-body">
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Two-Factor Authentication</div>
+                      <div class="setting-description">Add an extra layer of security</div>
+                    </div>
+                    <button class="secondary-btn">Setup</button>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Biometric Login</div>
+                      <div class="setting-description">Use fingerprint or face recognition</div>
+                    </div>
+                    <label class="switch" aria-label="Biometric login">
+                      <input type="checkbox" id="biometric">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Auto-Lock</div>
+                      <div class="setting-description">Lock app after 5 minutes of inactivity</div>
+                    </div>
+                    <label class="switch" aria-label="Auto-lock">
+                      <input type="checkbox" id="autoLock" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Appearance -->
+              <h3 class="section-subtitle">Appearance &amp; Display</h3>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="setting-icon"><i class="fas fa-eye" aria-hidden="true"></i></div>
+                  <div class="setting-title">Theme &amp; Display</div>
+                </div>
+                <div class="setting-body">
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Theme Mode</div>
+                      <div class="setting-description">Choose light or dark mode</div>
+                    </div>
+                    <label for="themeMode" class="sr-only">Theme mode</label>
+                    <select id="themeMode">
+                      <option value="system">System Default</option>
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                    </select>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Font Size</div>
+                      <div class="setting-description">Adjust text size for readability</div>
+                    </div>
+                    <label for="fontSize" class="sr-only">Font size</label>
+                    <select id="fontSize">
+                      <option value="small">Small</option>
+                      <option value="medium" selected>Medium</option>
+                      <option value="large">Large</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Account Management -->
+              <h3 class="section-subtitle">Account Management</h3>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="setting-icon"><i class="fas fa-user-cog" aria-hidden="true"></i></div>
+                  <div class="setting-title">Account Management</div>
+                </div>
+                <div class="setting-body">
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Change Password</div>
+                      <div class="setting-description">Secure your account by updating your password</div>
+                    </div>
+                    <button class="secondary-btn">Change</button>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Delete Account</div>
+                      <div class="setting-description">Permanently remove your account and data</div>
+                    </div>
+                    <button class="secondary-btn" id="deleteAccount">Delete</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Integrations -->
+              <h3 class="section-subtitle">Integrations</h3>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="setting-icon"><i class="fas fa-plug" aria-hidden="true"></i></div>
+                  <div class="setting-title">Connected Apps</div>
+                </div>
+                <div class="setting-body">
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Google Drive</div>
+                      <div class="setting-description">Sync documents with your Google account</div>
+                    </div>
+                    <button class="secondary-btn" id="connectBtn">Connect</button>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Calendar Integration</div>
+                      <div class="setting-description">Receive reminders and schedule expiry alerts</div>
+                    </div>
+                    <label class="switch" aria-label="Calendar integration">
+                      <input type="checkbox" id="calendarToggle">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Notifications -->
+              <h3 class="section-subtitle">Notifications</h3>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="setting-icon"><i class="fas fa-bell" aria-hidden="true"></i></div>
+                  <div class="setting-title">Notifications</div>
+                </div>
+                <div class="setting-body">
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Email Notifications</div>
+                      <div class="setting-description">Receive important updates via email</div>
+                    </div>
+                    <label class="switch" aria-label="Email notifications">
+                      <input type="checkbox" id="emailNotifications" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">SMS Alerts</div>
+                      <div class="setting-description">Get transaction alerts via SMS</div>
+                    </div>
+                    <label class="switch" aria-label="SMS alerts">
+                      <input type="checkbox" id="smsAlerts">
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Push Notifications</div>
+                      <div class="setting-description">App notifications on this device</div>
+                    </div>
+                    <label class="switch" aria-label="Push notifications">
+                      <input type="checkbox" id="pushNotifications" checked>
+                      <span class="slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- About & Legal -->
+              <h3 class="section-subtitle">About &amp; Legal</h3>
+              <div class="setting-card">
+                <div class="setting-header">
+                  <div class="setting-icon"><i class="fas fa-info-circle" aria-hidden="true"></i></div>
+                  <div class="setting-title">About e-DocSafe</div>
+                </div>
+                <div class="setting-body">
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Developer</div>
+                      <div class="setting-description">Kelvinet Technologies<sup>&reg;</sup></div>
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">App Version</div>
+                      <div class="setting-description">e-DocSafe <span class="badge">v1.2.0 (Latest)</span></div>
+                    </div>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Privacy Policy</div>
+                      <div class="setting-description">Learn how we protect your data</div>
+                    </div>
+                    <a href="Privacy-policy.html" target="_blank" rel="noopener noreferrer" class="btn-km">View</a>
+                  </div>
+                  <div class="setting-item">
+                    <div>
+                      <div class="setting-label">Terms of Service</div>
+                      <div class="setting-description">Our agreement with you</div>
+                    </div>
+                    <a href="Terms.html" target="_blank" rel="noopener noreferrer" class="btn-km">Read</a>
+                  </div>
+                </div>
+              </div>
+
+            </div><!-- /grid-setting -->
+
+            <div id="settingsSavedMsg" class="info-message hidden" role="alert">
+              <i class="fas fa-check-circle" aria-hidden="true"></i> Settings saved successfully.
+            </div>
+
+            <div class="setting-actions" style="margin-top:1.5rem; text-align:right; gap:2rem;">
+              <button class="btn btn-outline" onclick="resetSettings()">Reset to Default</button>
+              <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
+            </div>
+
+            <div class="security-note">
+              <i class="fas fa-info-circle" aria-hidden="true"></i>
+              <div>
+                <b style="color:#27ae60;">Security Recommendations</b><br>
+                For your safety, we recommend enabling two-factor authentication and using a strong, unique password for your e-DocSafe account.
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             ACTIVITY LOGS SECTION
+        ════════════════════════════════════════ -->
+        <div id="auditLogs" class="section-container">
+          <div class="section active">
+            <h2>Activity Logs</h2>
+            <div class="analytics">
+              <div class="card-section">
+                <center><h3>Upload Summary</h3></center>
+                <div id="uploadStats" style="margin-top:20px; padding:10px; background:var(--bg); border-radius:8px;">
+                  <ul>
+                    <li><b>Total Uploads:</b> <span id="totalUploads">0</span></li>
+                    <li><b>Most Uploaded Type:</b> <span id="mostType">—</span></li>
+                    <li><b>Peak Upload Period:</b> <span id="peakPeriod">—</span></li>
+                    <li><b>First Upload:</b> <span id="firstUpload">—</span></li>
+                    <li><b>Encrypted Files:</b> <span id="encryptedCount">0</span></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="metric-card card-section">
+                <h2><i class="fas fa-chart-pie" aria-hidden="true"></i> File Type Distribution</h2>
+                <canvas id="docTypeChart" width="400" height="200" aria-label="File type distribution chart" role="img"></canvas>
+              </div>
+
+              <div class="metric-card card-section">
+                <h2><i class="fas fa-file-contract" aria-hidden="true"></i> Upload Analytics</h2>
+                <label for="dateFilter">Filter By:</label>
+                <select id="dateFilter">
+                  <option value="day">Daily</option>
+                  <option value="week">Weekly</option>
+                  <option value="month">Monthly</option>
+                </select><br><br>
+                <canvas id="uploadHistoryChart" width="600" height="300" style="border-radius:12px;" aria-label="Upload history chart" role="img"></canvas>
+              </div>
+
+              <div class="metric-card">
+                <h3>Activity Breakdown</h3>
+                <canvas id="activityPieChart" width="200" height="200" aria-label="Activity breakdown chart" role="img"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             TRASH SECTION
+        ════════════════════════════════════════ -->
+        <div id="trash" class="section-container">
+          <div class="section active">
+            <h2>Trashed Documents</h2>
+            <p><i class="fas fa-trash-alt" aria-hidden="true"></i> Documents are permanently deleted after 30 days.</p><br>
+
+            <div class="controls">
+              <button id="RestoreBtn" class="btn" onclick="restoreAllTrash()">
+                <i class="fas fa-undo" aria-hidden="true"></i> Restore All
+              </button>
+              <button class="btn" style="background:#dc3545;" onclick="emptyTrash()">
+                <i class="fas fa-broom" aria-hidden="true"></i> Empty Trash
+              </button>
+            </div>
+
+            <div class="bulk-actions">
+              <button onclick="restoreSelected()" class="btn small">Restore Selected</button>
+              <button onclick="purgeSelected()" class="btn small danger">Delete Selected</button>
+            </div>
+
+            <div id="trashGrid" class="grid" role="list" aria-label="Trashed documents"></div>
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             HELP & SUPPORT SECTION
+        ════════════════════════════════════════ -->
+        <div id="support" class="section-container">
+          <div class="section active">
+            <h2 id="supportTitle">Help &amp; Support</h2>
+
+            <div class="support-card">
+              <h3>Get In Touch</h3>
+              <p>Feel free to reach out to us for any inquiries or assistance.</p>
+
+              <div class="contact-grid">
+                <div class="contact-card">
+                  <b><i class="fas fa-map-marker-alt" aria-hidden="true"></i> Address:</b>
+                  <p class="contact-details">
+                    KELVINET TECHNOLOGIES<br>
+                    KELVINET TOWERS,<br>
+                    Kelvinet Avenue,<br>
+                    Konza City.
+                  </p>
+                </div>
+                <div class="contact-card">
+                  <b><i class="fas fa-envelope" aria-hidden="true"></i> Email:</b>
+                  <p class="contact-details">
+                    <a href="mailto:support@e-docsafe.com">support@e-docsafe.com</a><br>
+                    (Response within 24 hours.)
+                  </p>
+                </div>
+                <div class="contact-card">
+                  <b><i class="fas fa-phone" aria-hidden="true"></i> Phone:</b>
+                  <p class="contact-details">
+                    <a href="tel:+18003627233">+1 800 DOC-SAFE</a>
+                  </p>
+                </div>
+                <div class="contact-card">
+                  <b><i class="fas fa-globe" aria-hidden="true"></i> Website:</b>
+                  <p class="contact-details">
+                    <a href="https://www.edocsafe.com/help/" target="_blank" rel="noopener noreferrer">www.edocsafe.com</a>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick tips -->
+            <div class="quick-tips" role="list" aria-label="Keyboard shortcuts">
+              <div class="tip-card" role="listitem">
+                <h4>Quick Upload</h4>
+                <p>Use <kbd>Ctrl+U</kbd> to quickly upload a new document.</p>
+              </div>
+              <div class="tip-card" role="listitem">
+                <h4>Navigation</h4>
+                <p>Press <kbd>Ctrl+F</kbd> to search through your files.</p>
+              </div>
+              <div class="tip-card" role="listitem">
+                <h4>Save Annotations</h4>
+                <p>Press <kbd>Ctrl+S</kbd> to save annotations.</p>
+              </div>
+              <div class="tip-card" role="listitem">
+                <h4>Get Help Fast</h4>
+                <p>Use <kbd>Ctrl+?</kbd> to open this help section instantly.</p>
+              </div>
+            </div>
+
+            <!-- FAQ -->
+            <section class="faq-section" aria-label="Frequently asked questions">
+              <h2>Frequently Asked Questions</h2>
+
+              <div class="faq">
+                <button class="faq-question" aria-expanded="false">
+                  How secure is my data? <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" hidden>
+                  <p>Your files are encrypted with <mark>AES-256-GCM</mark> at rest and <mark>TLS/SSL 1.3</mark> in transit.</p>
+                  <p>&#9671; Supports multi-factor authentication for extra security.</p>
+                </div>
+              </div>
+
+              <div class="faq">
+                <button class="faq-question" aria-expanded="false">
+                  Can I share files with non-users? <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" hidden>
+                  <p>Yes — generate a secure link that can be accessed without an account, with optional expiration settings.</p>
+                </div>
+              </div>
+
+              <div class="faq">
+                <button class="faq-question" aria-expanded="false">
+                  How do I upload a document? <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" hidden>
+                  <p>Navigate to the &ldquo;Upload&rdquo; tab, choose your file, and click the upload icon. You'll see a success notification when it's done.</p>
+                </div>
+              </div>
+
+              <div class="faq">
+                <button class="faq-question" aria-expanded="false">
+                  Can I access e-DocSafe on my mobile? <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" hidden>
+                  <p>Yes, e-DocSafe is responsive and works across all devices, including smartphones and tablets.</p>
+                </div>
+              </div>
+
+              <div class="faq">
+                <button class="faq-question" aria-expanded="false">
+                  What file formats are supported? <span aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" hidden>
+                  <p>We support: PDF, DOCX, XLSX, PPTX, TXT, Image formats (JPG, PNG, WEBP), and TIFF.</p>
+                </div>
+              </div>
+            </section>
+
+            <!-- Knowledge Base -->
+            <section id="kb" class="kb-section" aria-label="Knowledge base">
+              <h2>Knowledge Base</h2>
+              <label for="kb-search" class="sr-only">Search knowledge base articles</label>
+              <input type="search" id="kb-search" placeholder="Search articles...">
+              <div id="kb-list" role="list"></div>
+            </section>
+
+            <!-- More help -->
+            <section class="more-help" aria-label="Additional help resources">
+              <h3>Need more help?</h3>
+              <p>
+                <i class="fas fa-check-circle" style="color:#1da1f2;" aria-hidden="true"></i>
+                Download <a href="/assets/e-DocSafe-UserGuide.pdf">User Guide</a> for more info.
+              </p>
+              <p>
+                <i class="fas fa-check-circle" style="color:#1da1f2;" aria-hidden="true"></i>
+                Explore <a href="#">Video tutorials</a> or book a 1-on-1 training session at
+                <a href="https://www.edocsafe.com/register/training" target="_blank" rel="noopener noreferrer">www.edocsafe.com</a>.
+              </p>
+              <p>
+                <i class="fas fa-check-circle" style="color:#1da1f2;" aria-hidden="true"></i>
+                Check real-time <a href="/status">System Status</a> or join our
+                <a href="https://edocsafe.slack.com/" target="_blank" rel="noopener noreferrer">Slack Community</a>.
+              </p>
+            </section>
+
+            <!-- Support Ticket Form -->
+            <section id="ticket" class="ticket-section" aria-label="Submit a support ticket">
+              <h3>Submit a Support Ticket</h3>
+              <!-- FIXED: removed <form> submit + onclick anti-pattern; use button type=button -->
+              <div id="supportForm">
+                <div class="form-group">
+                  <label for="supportEmail">Email Address:</label>
+                  <input type="email" id="supportEmail" class="form-input" placeholder="you@example.com" required>
+                </div>
+                <div class="form-group">
+                  <label for="supportSubject">Subject:</label>
+                  <input type="text" id="supportSubject" class="form-input" placeholder="Brief summary" required>
+                </div>
+                <div class="form-group">
+                  <label for="supportDescription">Description:</label>
+                  <textarea id="supportDescription" class="form-input" rows="4" placeholder="Describe your issue" required></textarea>
+                </div>
+                <button type="button" class="secondary-btn" onclick="confirmSubmission()">Submit Ticket</button>
+              </div>
+            </section>
+
+            <!-- Live Chat -->
+            <button class="chat-btn" id="chatBtn" aria-label="Open live chat">💬</button>
+            <div class="chat-box" id="chatBox" role="dialog" aria-modal="true" aria-label="Live chat">
+              <div class="chat-header">
+                <h4>Live Chat</h4>
+                <button class="close-btn" id="closeBtn" aria-label="Close chat">&times;</button>
+              </div>
+              <div class="chat-messages" id="chatMessages" aria-live="polite">
+                <p class="system-msg">&#128075; Hi! How can we assist you today?</p>
+              </div>
+              <div class="chat-input">
+                <label for="userInput" class="sr-only">Type your message</label>
+                <input type="text" id="userInput" placeholder="Type your message...">
+                <button id="sendBtn" class="btn-primary">
+                  <i class="fas fa-paper-plane" aria-hidden="true"></i> Send
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+
+        <!-- ════════════════════════════════════════
+             MY DOCUMENTS SECTION
+        ════════════════════════════════════════ -->
+        <div id="docs" class="section-container">
+          <div class="section active">
+            <h2>My Documents</h2>
+
+            <div class="search-bar">
+              <label for="searchInput" class="sr-only">Search documents</label>
+              <input type="search" class="search-input" id="searchInput" placeholder="Search documents . . .">
+            </div>
+
+            <div class="controls">
+              <button class="btn" id="docsUploadBtn"
+                      onclick="document.getElementById('uploadModal').style.display='flex';">
+                <i class="fas fa-plus-circle" aria-hidden="true"></i> Upload New
+              </button>
+
+              <div class="sort-filter">
+                <label for="sortSelect" class="sr-only">Sort documents</label>
+                <select id="sortSelect" class="filter-dropdown" title="Sort documents">
+                  <option value="date_desc">Newest ↑</option>
+                  <option value="date_asc">Oldest ↓</option>
+                  <option value="name_asc">Name A→Z</option>
+                  <option value="name_desc">Name Z→A</option>
+                </select>
+
+                <label for="filterSelect" class="sr-only">Filter documents</label>
+                <select class="filter-dropdown" id="filterSelect">
+                  <option value="all">All Documents</option>
+                  <option value="encrypted">Encrypted Only</option>
+                  <option value="favorites">Favorites</option>
+                </select>
+              </div>
+
+              <button aria-label="Move all documents to trash" id="clearAllBtn"
+                      title="Clear all documents" onclick="clearAllDocs()">
+                <i class="fas fa-trash-alt" aria-hidden="true"></i> Clear All
+              </button>
+            </div>
+
+            <div class="docs-view-toggle" role="group" aria-label="View mode">
+              <button id="btnList" class="active" onclick="setView('list')" aria-pressed="true">
+                <i class="fas fa-bars" aria-hidden="true"></i> List
+              </button>
+              <button id="btnGrid" onclick="setView('grid')" aria-pressed="false">
+                <i class="fas fa-th" aria-hidden="true"></i> Grid
+              </button>
+            </div><br>
+
+            <div id="docsGrid" class="docs-grid view-toggle" role="list" aria-label="Document list"></div>
+          </div>
+        </div>
+
+      </div><!-- /content -->
+    </div><!-- /main -->
+  </div><!-- /container -->
+
+
+  <!-- ══════════════════════════════════════════════════
+       GLOBAL NOTIFICATION TOAST
+  ══════════════════════════════════════════════════ -->
+  <div id="notification" class="notification hidden" role="alert" aria-live="assertive"></div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       PREVIEW MODAL
+  ══════════════════════════════════════════════════ -->
+  <div id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewTitle">
+    <div id="previewContent">
+      <div class="preview-header">
+        <div class="header-left">
+          <h3 id="previewTitle"></h3>
+          <div class="file-info">
+            <span id="fileType"></span> | <span id="fileSize"></span>
+          </div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" id="shareBtn" title="Share" aria-label="Share document">
+            <i class="fas fa-share-alt" aria-hidden="true"></i>
+          </button>
+          <button class="icon-btn" id="downloadBtn" title="Download" aria-label="Download document">
+            <i class="fas fa-download" aria-hidden="true"></i>
+          </button>
+          <button class="icon-btn" id="printBtn" title="Print" aria-label="Print document">
+            <i class="fas fa-print" aria-hidden="true"></i>
+          </button>
+          <button id="closeModal" title="Close preview" aria-label="Close preview">&times;</button>
+        </div>
+      </div>
+      <div id="loadingIndicator" class="spinner hidden" aria-live="polite">
+        <i class="fas fa-spinner fa-spin fa-3x" aria-hidden="true"></i>
+        <p class="loading-message">
+          <span id="loadingText">Loading preview</span><span id="dots"></span>
+        </p>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       SHARING MODAL
+  ══════════════════════════════════════════════════ -->
+  <div id="sharingModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="sharingTitle">
+    <div class="modal">
+      <div class="modal-title">
+        <h2 id="sharingTitle"><i class="fas fa-share-alt" aria-hidden="true"></i> Share Document</h2>
+        <button id="closeModalBtn" class="close-btn" aria-label="Close sharing dialog">&times;</button>
+      </div>
+
+      <div class="modal-tabs" role="tablist">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="email">Email</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="linkedin">LinkedIn</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="link">Generate Link</button>
+      </div>
+
+      <!-- Email tab -->
+      <div id="emailTab" class="modal-content" role="tabpanel">
+        <label for="emailInput">Email:</label>
+        <input type="email" id="emailInput">
+        <span id="emailError" class="error-msg" role="alert"></span>
+        <label for="emailMessage">Message:</label>
+        <textarea id="emailMessage" rows="3"></textarea>
+        <span id="messageError" class="error-msg" role="alert"></span>
+        <button id="sendEmailBtn" class="action_btn email">
+          <i class="fas fa-paper-plane" aria-hidden="true"></i> Send Email
+        </button>
+      </div>
+
+      <!-- LinkedIn tab -->
+      <div id="linkedinTab" class="modal-content hidden" role="tabpanel">
+        <p>Click below to share on LinkedIn:</p>
+        <button id="shareLinkedInBtn" class="action_btn">
+          <i class="fab fa-linkedin" aria-hidden="true"></i> Share on LinkedIn
+        </button>
+      </div>
+
+      <!-- Link tab -->
+      <div id="linkTab" class="modal-content hidden" role="tabpanel">
+        <label>Permissions:</label>
+        <div class="permissions">
+          <label><input type="checkbox" id="viewPermission" checked> View</label>
+          <label><input type="checkbox" id="downloadPermission"> Download</label>
+          <label><input type="checkbox" id="linkPassword"> Require Password</label>
+        </div>
+        <label for="expiryDate">Expiry Date:</label>
+        <div class="expiry-input-wrapper">
+          <input type="date" id="expiryDate">
+          <i id="calendarIcon" class="fas fa-calendar-alt" aria-hidden="true"></i>
+        </div>
+        <span id="expiryError" class="error-msg" role="alert"></span>
+        <button id="generateLinkBtn" class="action_btn">
+          <i class="fas fa-link" aria-hidden="true"></i> Generate Link
+        </button>
+        <div class="generated-link-group">
+          <input type="text" id="generatedLink" readonly aria-label="Generated share link">
+          <button id="copyLinkBtn" disabled class="copy-btn" aria-label="Copy link">
+            <i class="fas fa-copy" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       RENAME MODAL
+  ══════════════════════════════════════════════════ -->
+  <div id="renameModal" class="rename-modal hidden" role="dialog" aria-modal="true" aria-labelledby="renameTitle">
+    <div class="rename-content">
+      <h2 id="renameTitle">Rename Document</h2>
+      <label for="renameInput" class="sr-only">New document name</label>
+      <input type="text" id="renameInput" placeholder="Enter new name">
+      <div class="modal-buttons">
+        <button class="cancelBtn" onclick="closeRenameModal()">Cancel</button>
+        <button class="renameBtn" onclick="confirmRename()">Rename</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       UPLOAD MODAL
+  ══════════════════════════════════════════════════ -->
+  <!-- FIXED: removed duplicate #fileInput and #dropZone ids that existed in the Upload section above -->
+  <div class="modal-overlay hidden" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
+    <div class="Upload-modal">
+      <button class="close" id="cancelUploadBtn" onclick="closeUploadModal()" aria-label="Close upload dialog">&times;</button>
+      <h3 id="uploadTitle">Upload New Document</h3><br>
+      <div class="upload-content" id="dropZone">
+        <label for="fileInput" class="upload-label">
+          <i class="fas fa-cloud-upload-alt fa-2x" aria-hidden="true"></i>
+          <h4>Drag &amp; Drop or click to select</h4>
+        </label>
+        <input type="file" id="fileInput" class="upload-input" aria-describedby="uploadStatusText" multiple>
+        <div class="security-info">
+          <span class="security-badge"><i class="fas fa-lock" aria-hidden="true"></i> AES-256</span>
+          <span class="security-badge"><i class="fas fa-shield-alt" aria-hidden="true"></i> TLS 1.3</span>
+        </div>
+      </div>
+      <div class="selected-file" id="selectedFile" aria-live="polite"></div>
+      <div class="status-text" id="uploadStatusText" aria-live="polite"></div>
+      <div class="loader" id="loader" aria-hidden="true"></div>
+      <div class="progress-container" id="progressContainer" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+        <div class="progress-bar" id="progressBar"></div>
+      </div>
+      <button class="upload" id="startUpload" disabled>
+        <i class="fas fa-upload" aria-hidden="true"></i> Upload
+      </button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       CONFIRMATION MODAL (generic)
+  ══════════════════════════════════════════════════ -->
+  <div id="confirmationModal" class="custom-modal hidden" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+    <div class="modal-Content">
+      <div class="modal-header" id="modalHeader">
+        <i id="modalIcon" class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+        <h3 id="confirmModalTitle">Confirm Action</h3>
+      </div>
+      <p id="modalMessage">Are you sure you want to proceed with this action?</p>
+      <div id="modalSpinner" class="spinner hidden" aria-hidden="true"></div>
+      <div id="modalCheckmark" class="success-check hidden" aria-hidden="true">
+        <svg viewBox="0 0 52 52" aria-hidden="true">
+          <circle class="check-circle" cx="26" cy="26" r="25" fill="none"/>
+          <path class="checkmark" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+        </svg>
+      </div>
+      <div class="modal-actions">
+        <button class="cancelBtn" id="modalCancelBtn">Cancel</button>
+        <button id="modalConfirmBtn" class="btn">Yes</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       DELETE ACCOUNT MODAL
+  ══════════════════════════════════════════════════ -->
+  <div id="deleteModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+    <div class="delete-modal">
+      <h3 id="deleteModalTitle">
+        <i class="fas fa-exclamation-triangle" style="color:red;" aria-hidden="true"></i>
+        Confirm Account Deletion
+      </h3>
+      <p>This action cannot be undone. All your data will be permanently deleted after a 30-day grace period.</p>
+      <div class="modal-action">
+        <button class="cancelBtn" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn-danger" onclick="deleteAccount()">Yes, Delete My Account</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       NOTIFICATION MODAL
+  ══════════════════════════════════════════════════ -->
+  <div class="notification-modal" id="notificationModal" role="dialog" aria-modal="true" aria-label="Notifications">
+    <div class="notification-content">
+      <h3>Notifications</h3>
+      <p id="messages">No notifications.</p>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       FOLDER MODAL
+  ══════════════════════════════════════════════════ -->
+  <div id="folderModal" class="Foldermodal" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle">
+    <div class="folder-content">
+      <h3 id="folderModalTitle">Create New Folder</h3>
+      <label for="folderName" class="sr-only">Folder name</label>
+      <input type="text" id="folderName" class="search-box" placeholder="Folder name" style="width:100%; margin:10px 0;">
+      <button class="btns" onclick="createFolder()">Create</button>
+      <button class="btns" onclick="closeFolderModal('folderModal')">Cancel</button>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       SUPPORT TICKET CONFIRMATION MODAL
+  ══════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="supportModalTitle">
+    <div class="support-modal" id="modalContent">
+      <h2 id="supportModalTitle">Confirm Submission</h2>
+      <p id="supportModalMessage">Are you sure you want to submit the support ticket?</p>
+      <div id="formSummary"></div>
+      <div class="modal-buttons">
+        <button class="confirm-btn" id="confirmBtn">Submit</button>
+        <button class="cancel-btn" onclick="closeSupportModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════
+       SCREEN READER ONLY UTILITY CLASS
+  ══════════════════════════════════════════════════ -->
+  <style>
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+  </style>
+
+
+  <!-- ══════════════════════════════════════════════════
+       SCRIPTS
+       FIXED: removed type="module" from UploadModal.js (mixed module/defer
+       caused scope isolation issues); all scripts now use defer consistently.
+       FIXED: removed debug console.log block from production.
+       FIXED: firebase-config.js loaded once in <head> — removed duplicate here.
+  ══════════════════════════════════════════════════ -->
+
+  <!-- IndexedDB helper -->
+  <script src="DBHelper.js" defer></script>
+  <!-- Firebase managers (depend on firebase-config.js already loaded in <head>) -->
+  <script src="firebase-auth.js" defer></script>
+  <script src="firebase-sync.js" defer></script>
+  <!-- Upload modal logic (FIXED: was type="module", now defer for consistent scope) -->
+  <script src="UploadModal.js" defer></script>
+  <!-- Main app logic -->
+  <script src="e-DocSafe.js" defer></script>
+  <!-- Auth logic -->
+  <script src="auth.js" defer></script>
+
+  <!-- Inline: connection toast + year + sidebar toggle ARIA -->
+  <script>
+    // Dynamic year — wrapped in DOMContentLoaded to ensure #year element exists
+    document.addEventListener('DOMContentLoaded', function() {
+      const yearEl = document.getElementById('year');
+      if (yearEl) yearEl.textContent = new Date().getFullYear();
+    });
+
+    // Connection toast
+    (function() {
+      const toast = document.getElementById('connection-toast');
+      let hideTimeout;
+
+      async function verifyConnection() {
+        try {
+          if (!navigator.onLine) { updateToast(false); return; }
+          await fetch('https://www.gstatic.com/generate_204', { mode: 'no-cors' });
+          updateToast(true);
+        } catch (e) { updateToast(false); }
+      }
+
+      function updateToast(isOnline) {
+        toast.classList.add('animate', 'show');
+        clearTimeout(hideTimeout);
+        if (isOnline) {
+          toast.className = 'online animate show';
+          toast.innerHTML = '<i class="fa-solid fa-wifi" aria-hidden="true"></i> Online — All features active';
+          hideTimeout = setTimeout(() => toast.classList.remove('show'), 5000);
+        } else {
+          toast.className = 'offline animate show';
+          toast.innerHTML = '<i class="fa-solid fa-wifi-slash" aria-hidden="true"></i> Offline — Using local storage';
+        }
+        setTimeout(() => toast.classList.remove('animate'), 800);
+      }
+
+      verifyConnection();
+      window.addEventListener('online',  () => updateToast(true));
+      window.addEventListener('offline', () => updateToast(false));
+      setInterval(verifyConnection, 20000);
+    })();
+
+    // Sidebar toggle ARIA
+    function updateSidebarAria() {
+      const sidebar  = document.getElementById('sidebar');
+      const toggleBtn = document.getElementById('sidebarToggle');
+      const backdrop = document.getElementById('sidebarBackdrop');
+      const isOpen   = !sidebar.classList.contains('collapsed');
+      if (toggleBtn) toggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (backdrop)  backdrop.classList.toggle('visible', isOpen && window.innerWidth < 768);
+    }
+    // Call after sidebar toggleSidebar() runs
+    document.addEventListener('DOMContentLoaded', () => {
+      const sidebarToggleBtn = document.getElementById('sidebarToggle');
+      if (sidebarToggleBtn) {
+        sidebarToggleBtn.addEventListener('click', () => setTimeout(updateSidebarAria, 50));
+      }
+    });
+  </script>
+
+</body>
+</html>
