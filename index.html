@@ -40,7 +40,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- Platform stylesheet -->
   <link rel="stylesheet" href="e-DocSafe-platform.css">
@@ -148,7 +148,7 @@
     </div>
 
     <!-- ── Main content area ── -->
-    <div class="main" id="main-content">
+    <div class="main" id="main-content" tabindex="-1">
 
       <!-- Topbar -->
       <header class="topbar" role="banner">
@@ -175,7 +175,7 @@
             </button>
           </div>
 
-          <button class="user-icon" id="userIcon" onclick="toggleDropdown()" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
+          <button class="user-icon" id="userIcon" onclick="toggleDropdown(e)" aria-label="User menu" aria-haspopup="true" aria-expanded="false">
             KM
           </button>
         </div>
@@ -223,7 +223,7 @@
           <div class="section active">
             <div class="dashboard-header">
               <h2 class="dashboard-title" style="text-align:left; font-weight:bold; letter-spacing:-0.5px;">
-                Welcome to <rem><em>ě‑Doc</em><span>Safe</span></rem>,
+                Welcome to <span class="brand-inline"><em>ě‑Doc</em><span>Safe</span></span>,
                 <span id="welcomeName">User</span>!
               </h2>
               <p>Overview of your storage usage, recent activity, and alerts.</p>
@@ -279,7 +279,7 @@
             <!-- Quick action toolbar -->
             <div class="toolbar" role="toolbar" aria-label="Quick actions">
               <button class="action-btn" id="quickUpload"
-                      onclick="document.getElementById('uploadModal').style.display='flex';">
+                      onclick="openUpModal()">
                 <i class="fas fa-file-import" aria-hidden="true"></i> Upload
               </button>
               <button class="action-btn" id="scanActionBtn" onclick="scan()">
@@ -295,10 +295,9 @@
           </div>
         </div>
 
-
-        <!-- ════════════════════════════════════════
+        <!-- ═══════════════════════════════════
              PROFILE SECTION
-        ════════════════════════════════════════ -->
+          ═══════════════════════════════════ -->
         <div id="profile" class="section-container">
           <div class="section active" id="profilePage">
             <h2 class="page-title"><i class="fas fa-user" aria-hidden="true"></i> My Profile</h2>
@@ -316,7 +315,6 @@
                 <div class="info-grid">
                   <div class="info-item">
                     <div class="info-label">Full Legal Name</div>
-                    <!-- FIXED: removed hardcoded "Kelvin Mwichwiri" — populated by loadProfile() from Firebase Auth -->
                     <div class="info-value displayFullName"></div>
                   </div>
                   <div class="info-item">
@@ -325,7 +323,6 @@
                   </div>
                   <div class="info-item">
                     <div class="info-label">Phone Number</div>
-                    <!-- FIXED: removed hardcoded phone number -->
                     <div class="info-value displayPhone">—</div>
                   </div>
                   <div class="info-item">
@@ -448,7 +445,6 @@
           </div>
         </div>
 
-
         <!-- ════════════════════════════════════════
              UPLOAD SECTION
         ════════════════════════════════════════ -->
@@ -457,10 +453,8 @@
             <h2>Secure Document Upload</h2>
             <p>Upload your critical files to your secure storage with client-side encryption.</p><br>
 
-            <!-- FIXED: removed duplicate #fileInput and #dropZone ids — only one of each here;
-                 the actual upload input lives in the Upload Modal below -->
             <div class="controls">
-              <button class="btn btn-primary" onclick="document.getElementById('uploadModal').style.display='flex';">
+              <button class="btn btn-primary" onclick="openUpModal()">
                 <i class="fas fa-cloud-upload-alt" aria-hidden="true"></i> Open Upload Dialog
               </button>
             </div>
@@ -483,7 +477,6 @@
             </div>
           </div>
         </div>
-
 
         <!-- ════════════════════════════════════════
              SHARED WITH ME SECTION
@@ -510,7 +503,6 @@
           </div>
         </div>
 
-
         <!-- ════════════════════════════════════════
              FAVORITES SECTION
         ════════════════════════════════════════ -->
@@ -533,7 +525,6 @@
             <div id="favoritesGrid" class="favorites-grid" role="list" aria-label="Favorite documents"></div>
           </div>
         </div>
-
 
         <!-- ════════════════════════════════════════
              ACTIVITY FEED SECTION
@@ -558,7 +549,6 @@
             </div>
           </div>
         </section>
-
 
         <!-- ════════════════════════════════════════
              SETTINGS SECTION
@@ -779,7 +769,7 @@
               <i class="fas fa-check-circle" aria-hidden="true"></i> Settings saved successfully.
             </div>
 
-            <div class="setting-actions" style="margin-top:1.5rem; text-align:right; gap:2rem;">
+            <div class="setting-actions" style="margin-top: 1.5rem; text-align: right; gap: 2rem;">
               <button class="btn btn-outline" onclick="resetSettings()">Reset to Default</button>
               <button class="btn btn-primary" onclick="saveSettings()">Save Changes</button>
             </div>
@@ -793,7 +783,6 @@
             </div>
           </div>
         </div>
-
 
         <!-- ════════════════════════════════════════
              ACTIVITY LOGS SECTION
@@ -839,7 +828,6 @@
           </div>
         </div>
 
-
         <!-- ════════════════════════════════════════
              TRASH SECTION
         ════════════════════════════════════════ -->
@@ -865,7 +853,6 @@
             <div id="trashGrid" class="grid" role="list" aria-label="Trashed documents"></div>
           </div>
         </div>
-
 
         <!-- ════════════════════════════════════════
              HELP & SUPPORT SECTION
@@ -1011,7 +998,6 @@
             <!-- Support Ticket Form -->
             <section id="ticket" class="ticket-section" aria-label="Submit a support ticket">
               <h3>Submit a Support Ticket</h3>
-              <!-- FIXED: removed <form> submit + onclick anti-pattern; use button type=button -->
               <div id="supportForm">
                 <div class="form-group">
                   <label for="supportEmail">Email Address:</label>
@@ -1051,7 +1037,6 @@
           </div>
         </div>
 
-
         <!-- ════════════════════════════════════════
              MY DOCUMENTS SECTION
         ════════════════════════════════════════ -->
@@ -1066,7 +1051,7 @@
 
             <div class="controls">
               <button class="btn" id="docsUploadBtn"
-                      onclick="document.getElementById('uploadModal').style.display='flex';">
+                      onclick="openUpModal()">
                 <i class="fas fa-plus-circle" aria-hidden="true"></i> Upload New
               </button>
 
@@ -1236,7 +1221,6 @@
   <!-- ══════════════════════════════════════════════════
        UPLOAD MODAL
   ══════════════════════════════════════════════════ -->
-  <!-- FIXED: removed duplicate #fileInput and #dropZone ids that existed in the Upload section above -->
   <div class="modal-overlay hidden" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadTitle">
     <div class="Upload-modal">
       <button class="close" id="cancelUploadBtn" onclick="closeUploadModal()" aria-label="Close upload dialog">&times;</button>
@@ -1307,7 +1291,6 @@
     </div>
   </div>
 
-
   <!-- ══════════════════════════════════════════════════
        NOTIFICATION MODAL
   ══════════════════════════════════════════════════ -->
@@ -1318,7 +1301,6 @@
     </div>
   </div>
 
-
   <!-- ══════════════════════════════════════════════════
        FOLDER MODAL
   ══════════════════════════════════════════════════ -->
@@ -1328,10 +1310,9 @@
       <label for="folderName" class="sr-only">Folder name</label>
       <input type="text" id="folderName" class="search-box" placeholder="Folder name" style="width:100%; margin:10px 0;">
       <button class="btns" onclick="createFolder()">Create</button>
-      <button class="btns" onclick="closeFolderModal('folderModal')">Cancel</button>
+      <button class="btns" onclick="closeFolderModal()">Cancel</button>
     </div>
   </div>
-
 
   <!-- ══════════════════════════════════════════════════
        SUPPORT TICKET CONFIRMATION MODAL
@@ -1348,7 +1329,6 @@
     </div>
   </div>
 
-
   <!-- ══════════════════════════════════════════════════
        SCREEN READER ONLY UTILITY CLASS
   ══════════════════════════════════════════════════ -->
@@ -1364,21 +1344,11 @@
     }
   </style>
 
-
-  <!-- ══════════════════════════════════════════════════
-       SCRIPTS
-       FIXED: removed type="module" from UploadModal.js (mixed module/defer
-       caused scope isolation issues); all scripts now use defer consistently.
-       FIXED: removed debug console.log block from production.
-       FIXED: firebase-config.js loaded once in <head> — removed duplicate here.
-  ══════════════════════════════════════════════════ -->
-
   <!-- IndexedDB helper -->
   <script src="DBHelper.js" defer></script>
   <!-- Firebase managers (depend on firebase-config.js already loaded in <head>) -->
   <script src="firebase-auth.js" defer></script>
   <script src="firebase-sync.js" defer></script>
-  <!-- Upload modal logic (FIXED: was type="module", now defer for consistent scope) -->
   <script src="UploadModal.js" defer></script>
   <!-- Main app logic -->
   <script src="e-DocSafe.js" defer></script>
