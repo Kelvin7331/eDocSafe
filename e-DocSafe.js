@@ -7,10 +7,14 @@
 
 'use strict';
 
-// ── Auth Guard ────────────────────────────────────────────────────────────────
-// Redirect to Sign-In if no Firebase session.
+// ── Auth Guard ───────────────────────────────────────────
+// Redirect to Sign-In if no Firebase session
 (function initAuthGuard() {
-  if (typeof firebase === 'undefined' || !window.firebaseAuth) return;
+  if (typeof firebase === 'undefined' || !window.firebaseAuth) {
+    console.warn('Auth guard: Firebase not ready. Forcing redirect to Sign-In.');
+    window.location.href = 'Sign-In.html';
+    return;
+  }
   window.firebaseAuth.onAuthStateChanged(function (user) {
     if (!user) {
       window.location.href = 'Sign-In.html';
@@ -30,10 +34,9 @@ if (typeof STORE_NAME === 'undefined') {
   window.STORE_NAME = 'documents';
 }
 
-// ════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════
 //  NAVIGATION & SIDEBAR
-// ════════════════════════════════════════════════════════════════════════════
-
+// ══════════════════════════════════════════
 const sidebar = document.getElementById('sidebar');
 
 function toggleSidebar() {
@@ -94,8 +97,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Close sidebar when clicking an item (mobile)
 if (sidebar) {
-  sidebar.addEventListener('click', () => {
-    if (window.innerWidth < 768) sidebar.classList.remove('open');
+  sidebar.addEventListener('click', (e) => {
+    if (window.innerWidth < 768 && e.target.closest('.menu-item')) {
+      sidebar.classList.remove('open');
+      // This line removes the grey backdrop!
+      const backdrop = document.getElementById('sidebarBackdrop');
+      if (backdrop) backdrop.classList.remove('visible');
+      const btn = document.getElementById('sidebarToggle');
+      if (btn) btn.setAttribute('aria-expanded', 'false');
+    }
   });
 }
 
@@ -139,10 +149,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ════════════════════════════════════════════════════════════════════════════
-//  MISSING FUNCTIONS REFERENCED IN HTML
-// ════════════════════════════════════════════════════════════════════════════
-
+//  Show notification modal
 function openNotificationModal() {
   const m = document.getElementById('notificationModal');
   if (!m) return;
